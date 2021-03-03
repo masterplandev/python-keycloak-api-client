@@ -1,0 +1,4 @@
+
+
+class KeycloakApiClientException(Exception):
+    pass

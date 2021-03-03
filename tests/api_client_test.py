@@ -1,0 +1,262 @@
+from typing import List, Optional
+from uuid import UUID
+
+import pytest
+
+from keycloak_api_client import KeycloakApiClient
+from keycloak_api_client.data_classes import (
+    KeycloakFederatedIdentity,
+    KeycloakTokens,
+    ReadKeycloakUser,
+    WriteKeycloakUser
+)
+
+
+raw_user_1_data = {
+    "id": "7428411e-38c3-47da-9b2e-181502b7148f",
+    "createdTimestamp": 1614767329366,
+    "username": "testname1",
+    "enabled": True,
+    "totp": False,
+    "emailVerified": True,
+    "firstName": "firstname",
+    "lastName": "lastname",
+    "email": "testname1@test.com",
+    "attributes": {"some_attrib": ["val1"]},
+    "disableableCredentialTypes": [],
+    "requiredActions": [],
+    "notBefore": 0,
+    "access": {
+        "manageGroupMembership": True,
+        "view": True, "mapRoles": True,
+        "impersonate": True, "manage": True
+    }
+}
+
+
+raw_user_2_data = {
+    "id": "11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf",
+    "createdTimestamp": 1614767377821,
+    "username": "testname2",
+    "enabled": True,
+    "totp": False,
+    "emailVerified": True,
+    "firstName": "firstname1",
+    "lastName": "firstname2",
+    "email": "test2@test.com",
+    "attributes": {"other_attrib": ["val2"]},
+    "disableableCredentialTypes": [],
+    "requiredActions": [],
+    "notBefore": 0,
+    "access": {
+        "manageGroupMembership": True, "view": True,
+        "mapRoles": True, "impersonate": True, "manage": True
+    }
+}
+
+
+def _keycloak_api_client_factory():
+    return KeycloakApiClient(
+        keycloak_url='http://localhost:8080',
+        realm='my-realm',
+        admin_username='admin-user',
+        admin_password='admin-pass',
+        admin_client_id='admin-client-id',
+        admin_client_secret='18069767-90f4-4364-a519-28f908727d7e',
+        token_exchange_target_client_id='frontend',
+    )
+
+
+def _get_keycloak_user_fixture(
+    suffix: str,
+    federated_identities: Optional[List[KeycloakFederatedIdentity]] = None,
+    keycloak_id: Optional[UUID] = None,
+    hashed_password: Optional[str] = None
+) -> WriteKeycloakUser:
+    return WriteKeycloakUser(
+        username=f'_username{suffix}',
+        first_name=f'_first_name{suffix}',
+        last_name=f'_last_name{suffix}',
+        email=f'_test-user{suffix}@test.com',
+        raw_password='pass',
+        hashed_password=hashed_password,
+        enabled=False,
+        email_verified=False,
+        federated_identities=federated_identities,
+        keycloak_id=keycloak_id,
+        attributes={
+            'some_attrib': f'val{suffix}'
+        }
+    )
+
+
+@pytest.mark.vcr()
+def test_search_for_existing_user():
+    assert _keycloak_api_client_factory().search_users(
+        query='testname'
+    ) == [
+        ReadKeycloakUser(
+            keycloak_id=UUID('7428411e-38c3-47da-9b2e-181502b7148f'),
+            username='testname1',
+            first_name='firstname',
+            last_name='lastname',
+            email='testname1@test.com',
+            enabled=True,
+            email_verified=True,
+            raw_data=raw_user_1_data
+        ),
+        ReadKeycloakUser(
+            keycloak_id=UUID('11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf'),
+            username='testname2',
+            first_name='firstname1',
+            last_name='firstname2',
+            email='test2@test.com',
+            enabled=True,
+            email_verified=True,
+            raw_data=raw_user_2_data
+        ),
+    ]
+
+
+@pytest.mark.vcr()
+def test_get_existing_user():
+    assert _keycloak_api_client_factory().get_keycloak_user(
+        email='testname1@test.com'
+    ) == ReadKeycloakUser(
+        keycloak_id=UUID('7428411e-38c3-47da-9b2e-181502b7148f'),
+        username='testname1',
+        first_name='firstname',
+        last_name='lastname',
+        email='testname1@test.com',
+        enabled=True,
+        email_verified=True,
+        raw_data=raw_user_1_data
+    )
+
+
+@pytest.mark.vcr()
+def test_get_existing_user_by_keycloak_id():
+    assert _keycloak_api_client_factory().get_keycloak_user(
+        keycloak_id=UUID('11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf')
+    ) == ReadKeycloakUser(
+        keycloak_id=UUID('11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf'),
+        username='testname2',
+        first_name='firstname1',
+        last_name='firstname2',
+        email='test2@test.com',
+        enabled=True,
+        email_verified=True,
+        raw_data=raw_user_2_data
+    )
+
+
+@pytest.mark.vcr()
+def test_get_not_existing_user():
+    assert _keycloak_api_client_factory().get_keycloak_user(
+        email='not-existing@test.com'
+    ) is None
+
+
+@pytest.mark.vcr()
+def test_get_not_existing_user_by_id():
+    assert _keycloak_api_client_factory().get_keycloak_user(
+        keycloak_id=UUID('3c2e80d3-3805-4325-9de6-7a8ec5b571d4')
+    ) is None
+
+
+@pytest.mark.vcr()
+def test_register_then_update_then_get_user():
+    keycloak_api_client = _keycloak_api_client_factory()
+    keycloak_id = UUID('bacca16b-8fe8-4dc3-bf5e-3599adcb545e')
+
+    assert keycloak_id == keycloak_api_client.register_user(
+        _get_keycloak_user_fixture(suffix='1')
+    )
+
+    assert keycloak_api_client._get_user_by_email('_test-user1@test.com') == {
+        "id": str(keycloak_id),
+        "createdTimestamp": 1614770258309,
+        "username": "_username1",
+        "enabled": False,
+        "totp": False,
+        "emailVerified": False,
+        "firstName": "_first_name1",
+        "lastName": "_last_name1",
+        "email": "_test-user1@test.com",
+        "attributes": {
+            "some_attrib": ["val1"]
+        },
+        "disableableCredentialTypes": [],
+        "requiredActions": [],
+        "notBefore": 0,
+        "access": {
+            "manageGroupMembership": True,
+            "view": True,
+            "mapRoles": True,
+            "impersonate": True,
+            "manage": True
+        }
+    }
+
+    keycloak_api_client.update_user(
+        _get_keycloak_user_fixture(
+            suffix='2',
+            federated_identities=[
+                KeycloakFederatedIdentity(
+                    provider_name='linkedin',
+                    user_id='linkedin-id',
+                    user_name='linkedin-name',
+                )
+            ],
+            keycloak_id=keycloak_id
+        )
+    )
+
+    assert {
+        'id': str(keycloak_id),
+        'createdTimestamp': 1614770258309,
+        'username': '_username2',
+        'enabled': False,
+        'totp': False,
+        'emailVerified': False,
+        'firstName': '_first_name2',
+        'lastName': '_last_name2',
+        'email': '_test-user2@test.com',
+        'attributes': {
+            'some_attrib': ['val2'],
+        },
+        "disableableCredentialTypes": [],
+        "requiredActions": [],
+        "notBefore": 0,
+        "access": {
+            "manageGroupMembership": True,
+            "view": True,
+            "mapRoles": True,
+            "impersonate": True,
+            "manage": True
+        }
+    } == keycloak_api_client._get_user_by_email('_test-user2@test.com')
+
+    assert [
+        dict(
+            identityProvider='linkedin',
+            userId='linkedin-id',
+            userName='linkedin-name',
+        )
+    ] == keycloak_api_client._get_user_identities(
+        keycloak_id=keycloak_id
+    )
+
+
+@pytest.mark.vcr()
+def test_get_user_tokens():
+    keycloak_api_client = _keycloak_api_client_factory()
+
+    assert keycloak_api_client.get_user_tokens(
+        keycloak_api_client.register_user(
+            _get_keycloak_user_fixture(suffix='1')
+        )
+    ) == KeycloakTokens(
+        access_token='eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpS0ZBa1YyY2xDWTdodlhGVTNrZmN2RzY2UHpKQWplYjFtU2hEOEVzVFRBIn0.eyJleHAiOjE2MTQ3NzE5NTAsImlhdCI6MTYxNDc3MTY1MCwianRpIjoiMTFiMDk0ZjgtYTg2MC00OGNlLTk5MWMtN2QxMGZkMzhkOWZkIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjpbImFjY291bnQiLCJmcm9udGVuZCJdLCJzdWIiOiIzNDZkZjMxYS0zMmExLTRkOWItYjYxMy1jNmQwYjRmZDFiYjAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJmcm9udGVuZCIsInNlc3Npb25fc3RhdGUiOiI0ZGY4Mjk4Yy1mZWJlLTQ5ZmUtODY0Zi0wZDk1NDc0MzUxMzMiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJfZmlyc3RfbmFtZTEgX2xhc3RfbmFtZTEiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJfdXNlcm5hbWUxIiwiZ2l2ZW5fbmFtZSI6Il9maXJzdF9uYW1lMSIsImZhbWlseV9uYW1lIjoiX2xhc3RfbmFtZTEiLCJlbWFpbCI6Il90ZXN0LXVzZXIxQHRlc3QuY29tIn0.CriZLjpfHF4OXPA4n2o5iu0unaC0xWy0FdeeG_KJD6MZ75EaFS3yo-jSDgwO1U91y7lZtHyOtWzntJ2j_MgvyhUWEivaL1mWeUdPOlZAFcsIUKzu_K_1Ht7AmSAOIkoDafsgmqCMs546dNnul3bT13rXgVsmPN0ndXBromo--liTDcPw1lGUqKRA9Ph-SrPV0we_BBTmXF-SuOTlOh1bK7m6WkL93Z6c3a6qEnuxeqPMiQGRh_qkeJ-FY6hNn-3ZL2HNgiJJT_VxlX--E1gKz3F2kx2p3UzjmPNzbURasG6VaXKXK0i2dQ8vIl1HGSbXkVG-X1YJZM_BxPM9CYkaWw',  # noqa
+        refresh_token='eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJmYjJjZDVjNC05NTk4LTQxMjQtODQzZC04OWJjZWJlNjdjOWEifQ.eyJleHAiOjE2MTQ3NzM0NTAsImlhdCI6MTYxNDc3MTY1MCwianRpIjoiYzdlMDNlMDQtYzhjNC00ZGQ3LTkwN2YtMWJkMTZhNGI0NDUyIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwic3ViIjoiMzQ2ZGYzMWEtMzJhMS00ZDliLWI2MTMtYzZkMGI0ZmQxYmIwIiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImZyb250ZW5kIiwic2Vzc2lvbl9zdGF0ZSI6IjRkZjgyOThjLWZlYmUtNDlmZS04NjRmLTBkOTU0NzQzNTEzMyIsInNjb3BlIjoicHJvZmlsZSBlbWFpbCJ9.eYeCbgYZfUj8Y-605hdsU2sp6M9gqTXRMp-YtZrtHmw'  # noqa
+    )
