@@ -1,0 +1,96 @@
+interactions:
+- request:
+    body: grant_type=password&username=admin-user&password=admin-pass&client_id=admin-client-id&client_secret=18069767-90f4-4364-a519-28f908727d7e
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '136'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - python-requests/2.25.1
+    method: POST
+    uri: http://localhost:8080/auth/realms/my-realm/protocol/openid-connect/token
+  response:
+    body:
+      string: '{"access_token":"eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpS0ZBa1YyY2xDWTdodlhGVTNrZmN2RzY2UHpKQWplYjFtU2hEOEVzVFRBIn0.eyJleHAiOjE2MTQ3Njg3ODYsImlhdCI6MTYxNDc2ODQ4NiwianRpIjoiMjdiYjFjODMtNjFhMy00ZTA1LTk4Y2EtMjM4YjIzZDUzMDdjIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjpbInJlYWxtLW1hbmFnZW1lbnQiLCJhY2NvdW50Il0sInN1YiI6ImU4MTk2MTcwLWJkNTMtNDM5My05ODZjLWNlNDU0NzhjMzFlNyIsInR5cCI6IkJlYXJlciIsImF6cCI6ImFkbWluLWNsaWVudC1pZCIsInNlc3Npb25fc3RhdGUiOiIxM2EzM2Q4Yy1iODM3LTQ1ZGItOTViNi05NjJmYzBlYjMwZTMiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctcmVhbG0iLCJ2aWV3LWlkZW50aXR5LXByb3ZpZGVycyIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4tdXNlciJ9.gv-CvfVw8cQHMdLPMhkI_nQ-kUlggtZ43qR8VYLHgyx_0Lv78Yzy94yV3sS_Docl6CX0tex5ggmggNUvEJOfuSdsRZMQUxi55WMrD_w4UTYYT6RBqMB8_oJrUot2p2iXcsKa9qw_D2ARtaLldLJSTNzP-oeHgWf5RjR4Ilvd1smXSKOS3I6tbhtHSMcE_4s4-Q5t1KyiBcl4DfjgZVZdU0fwWZ-jCYGCwBBO9COXiFkau1aTd96en_axtWGFnHhkh0L7snjc0nEp0WQTsvXusMvIXU1OvMPlVfdlMyXLh_55_j4tmHsLuhUhpU_-XGo6MlFl7sxwYhtRQU_s777rMQ","expires_in":300,"refresh_expires_in":1800,"refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJmYjJjZDVjNC05NTk4LTQxMjQtODQzZC04OWJjZWJlNjdjOWEifQ.eyJleHAiOjE2MTQ3NzAyODYsImlhdCI6MTYxNDc2ODQ4NiwianRpIjoiMWIxMTZhMDAtYTNmZC00ZDVlLTgwMjYtZTJjNDUyMGI1ZjhjIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwic3ViIjoiZTgxOTYxNzAtYmQ1My00MzkzLTk4NmMtY2U0NTQ3OGMzMWU3IiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImFkbWluLWNsaWVudC1pZCIsInNlc3Npb25fc3RhdGUiOiIxM2EzM2Q4Yy1iODM3LTQ1ZGItOTViNi05NjJmYzBlYjMwZTMiLCJzY29wZSI6InByb2ZpbGUgZW1haWwifQ.rKBQQMTZaFOlq8SNFnHJJwfMtZKDChGS4duCN1aj-PA","token_type":"Bearer","not-before-policy":0,"session_state":"13a33d8c-b837-45db-95b6-962fc0eb30e3","scope":"profile
+        email"}'
+    headers:
+      Cache-Control:
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2484'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Mar 2021 10:48:06 GMT
+      Pragma:
+      - no-cache
+      Referrer-Policy:
+      - no-referrer
+      Set-Cookie:
+      - KEYCLOAK_LOCALE=; Version=1; Comment=Expiring cookie; Expires=Thu, 01-Jan-1970
+        00:00:10 GMT; Max-Age=0; Path=/auth/realms/my-realm/; HttpOnly
+      - KC_RESTART=; Version=1; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Max-Age=0;
+        Path=/auth/realms/my-realm/; HttpOnly
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpS0ZBa1YyY2xDWTdodlhGVTNrZmN2RzY2UHpKQWplYjFtU2hEOEVzVFRBIn0.eyJleHAiOjE2MTQ3Njg3ODYsImlhdCI6MTYxNDc2ODQ4NiwianRpIjoiMjdiYjFjODMtNjFhMy00ZTA1LTk4Y2EtMjM4YjIzZDUzMDdjIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjpbInJlYWxtLW1hbmFnZW1lbnQiLCJhY2NvdW50Il0sInN1YiI6ImU4MTk2MTcwLWJkNTMtNDM5My05ODZjLWNlNDU0NzhjMzFlNyIsInR5cCI6IkJlYXJlciIsImF6cCI6ImFkbWluLWNsaWVudC1pZCIsInNlc3Npb25fc3RhdGUiOiIxM2EzM2Q4Yy1iODM3LTQ1ZGItOTViNi05NjJmYzBlYjMwZTMiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctcmVhbG0iLCJ2aWV3LWlkZW50aXR5LXByb3ZpZGVycyIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWRtaW4tdXNlciJ9.gv-CvfVw8cQHMdLPMhkI_nQ-kUlggtZ43qR8VYLHgyx_0Lv78Yzy94yV3sS_Docl6CX0tex5ggmggNUvEJOfuSdsRZMQUxi55WMrD_w4UTYYT6RBqMB8_oJrUot2p2iXcsKa9qw_D2ARtaLldLJSTNzP-oeHgWf5RjR4Ilvd1smXSKOS3I6tbhtHSMcE_4s4-Q5t1KyiBcl4DfjgZVZdU0fwWZ-jCYGCwBBO9COXiFkau1aTd96en_axtWGFnHhkh0L7snjc0nEp0WQTsvXusMvIXU1OvMPlVfdlMyXLh_55_j4tmHsLuhUhpU_-XGo6MlFl7sxwYhtRQU_s777rMQ
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: http://localhost:8080/auth/admin/realms/my-realm/users?email=not-existing%40test.com
+  response:
+    body:
+      string: '[]'
+    headers:
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 03 Mar 2021 10:48:06 GMT
+      Referrer-Policy:
+      - no-referrer
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1
