@@ -1,6 +1,6 @@
 import json
 from http import HTTPStatus
-from typing import List, Optional
+from typing import List, Optional, Callable, Union
 from urllib import parse
 from uuid import UUID
 
@@ -29,6 +29,9 @@ class KeycloakApiClient:
         admin_client_id: str,
         admin_client_secret: str,
         token_exchange_target_client_id: str,
+        keycloak_user_factory_wrapper: Optional[
+            Callable[[ReadKeycloakUser], object]
+        ] = None
     ):
         self.keycloak_url = keycloak_url
         self.realm = realm
@@ -37,6 +40,7 @@ class KeycloakApiClient:
         self.admin_client_id = admin_client_id
         self.admin_client_secret = admin_client_secret
         self.token_exchange_target_client_id = token_exchange_target_client_id
+        self.keycloak_user_factory_wrapper = keycloak_user_factory_wrapper
 
     def _get_token_url(self) -> str:
         return f'{self.keycloak_url}/auth/realms/{self.realm}'\
@@ -189,6 +193,19 @@ class KeycloakApiClient:
 
         return data
 
+    def _get_keycloak_user(
+        self,
+        user_endpoint_data: dict
+    ) -> Union[ReadKeycloakUser, object]:
+        keycloak_user = read_keycloak_user_factory(
+            user_endpoint_data=user_endpoint_data
+        )
+
+        if self.keycloak_user_factory_wrapper:
+            return self.keycloak_user_factory_wrapper(keycloak_user)
+
+        return keycloak_user
+
     def get_keycloak_user(
         self,
         email: Optional[str] = None,
@@ -196,17 +213,18 @@ class KeycloakApiClient:
     ) -> Optional[ReadKeycloakUser]:
         if email:
             user_data = self._get_user_by_email(email=email)
-        elif id:
+        elif keycloak_id:
             user_data = self._get_user_by_id(id=keycloak_id)
         else:
             raise KeycloakApiClientException(
-                'Invalid get user call. Email or Id has to be specified.'
+                'Invalid get user call. '
+                'Email or Keycloak Id has to be specified.'
             )
 
         if not user_data:
             return None
 
-        return read_keycloak_user_factory(user_endpoint_data=user_data)
+        return self._get_keycloak_user(user_endpoint_data=user_data)
 
     def register_user(self, write_keycloak_user: WriteKeycloakUser) -> UUID:
         response = requests.post(
@@ -303,6 +321,6 @@ class KeycloakApiClient:
             )
 
         return [
-            read_keycloak_user_factory(user_endpoint_data=user_data)
+            self._get_keycloak_user(user_endpoint_data=user_data)
             for user_data in response.json()
         ]

@@ -1,6 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 
+import attr
 import pytest
 
 from keycloak_api_client import KeycloakApiClient
@@ -55,7 +56,7 @@ raw_user_2_data = {
 }
 
 
-def _keycloak_api_client_factory():
+def _keycloak_api_client_factory(keycloak_user_factory_wrapper=None):
     return KeycloakApiClient(
         keycloak_url='http://localhost:8080',
         realm='my-realm',
@@ -64,6 +65,7 @@ def _keycloak_api_client_factory():
         admin_client_id='admin-client-id',
         admin_client_secret='18069767-90f4-4364-a519-28f908727d7e',
         token_exchange_target_client_id='frontend',
+        keycloak_user_factory_wrapper=keycloak_user_factory_wrapper
     )
 
 
@@ -147,6 +149,28 @@ def test_get_existing_user_by_keycloak_id():
         enabled=True,
         email_verified=True,
         raw_data=raw_user_2_data
+    )
+
+
+@pytest.mark.vcr()
+def test_get_existing_user_by_keycloak_id_with_custom_wrapper():
+    @attr.s(auto_attribs=True)
+    class OtherReadKeycloakUser:
+        my_param: str
+
+    def keycloak_user_factory_wrapper(
+        read_keycloak_user: ReadKeycloakUser
+    ) -> OtherReadKeycloakUser:
+        return OtherReadKeycloakUser(
+            my_param=read_keycloak_user.username
+        )
+
+    assert _keycloak_api_client_factory(
+        keycloak_user_factory_wrapper=keycloak_user_factory_wrapper
+    ).get_keycloak_user(
+        keycloak_id=UUID('11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf')
+    ) == OtherReadKeycloakUser(
+        my_param='testname2'
     )
 
 
