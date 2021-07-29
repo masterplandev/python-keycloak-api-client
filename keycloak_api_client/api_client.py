@@ -196,11 +196,12 @@ class KeycloakApiClient:
     ) -> Optional[ReadKeycloakUser]:
         if email:
             user_data = self._get_user_by_email(email=email)
-        elif id:
+        elif keycloak_id:
             user_data = self._get_user_by_id(id=keycloak_id)
         else:
             raise KeycloakApiClientException(
-                'Invalid get user call. Email or Id has to be specified.'
+                'Invalid get user call. '
+                'Email or Keycloak Id has to be specified.'
             )
 
         if not user_data:
