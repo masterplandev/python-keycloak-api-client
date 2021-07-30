@@ -10,7 +10,7 @@ from keycloak_api_client.data_classes import (
     ReadKeycloakUser,
     WriteKeycloakUser
 )
-
+from keycloak_api_client.factories import read_keycloak_user_factory
 
 raw_user_1_data = {
     "id": "7428411e-38c3-47da-9b2e-181502b7148f",
@@ -120,7 +120,7 @@ def test_search_for_existing_user():
 
 @pytest.mark.vcr()
 def test_get_existing_user():
-    assert _keycloak_api_client_factory().get_keycloak_user(
+    assert _keycloak_api_client_factory().get_keycloak_user_by_email(
         email='testname1@test.com'
     ) == ReadKeycloakUser(
         keycloak_id=UUID('7428411e-38c3-47da-9b2e-181502b7148f'),
@@ -136,7 +136,7 @@ def test_get_existing_user():
 
 @pytest.mark.vcr()
 def test_get_existing_user_by_keycloak_id():
-    assert _keycloak_api_client_factory().get_keycloak_user(
+    assert _keycloak_api_client_factory().get_keycloak_user_by_id(
         keycloak_id=UUID('11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf')
     ) == ReadKeycloakUser(
         keycloak_id=UUID('11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf'),
@@ -152,14 +152,14 @@ def test_get_existing_user_by_keycloak_id():
 
 @pytest.mark.vcr()
 def test_get_not_existing_user():
-    assert _keycloak_api_client_factory().get_keycloak_user(
+    assert _keycloak_api_client_factory().get_keycloak_user_by_email(
         email='not-existing@test.com'
     ) is None
 
 
 @pytest.mark.vcr()
 def test_get_not_existing_user_by_id():
-    assert _keycloak_api_client_factory().get_keycloak_user(
+    assert _keycloak_api_client_factory().get_keycloak_user_by_id(
         keycloak_id=UUID('3c2e80d3-3805-4325-9de6-7a8ec5b571d4')
     ) is None
 
@@ -173,7 +173,9 @@ def test_register_then_update_then_get_user():
         _get_keycloak_user_fixture(suffix='1')
     )
 
-    assert keycloak_api_client._get_user_by_email('_test-user1@test.com') == {
+    assert keycloak_api_client.get_keycloak_user_by_email(
+        '_test-user1@test.com'
+    ) == read_keycloak_user_factory({
         "id": str(keycloak_id),
         "createdTimestamp": 1614770258309,
         "username": "_username1",
@@ -196,7 +198,7 @@ def test_register_then_update_then_get_user():
             "impersonate": True,
             "manage": True
         }
-    }
+    })
 
     keycloak_api_client.update_user(
         _get_keycloak_user_fixture(
@@ -212,7 +214,9 @@ def test_register_then_update_then_get_user():
         )
     )
 
-    assert {
+    assert keycloak_api_client.get_keycloak_user_by_email(
+        '_test-user2@test.com'
+    ) == read_keycloak_user_factory({
         'id': str(keycloak_id),
         'createdTimestamp': 1614770258309,
         'username': '_username2',
@@ -235,7 +239,7 @@ def test_register_then_update_then_get_user():
             "impersonate": True,
             "manage": True
         }
-    } == keycloak_api_client._get_user_by_email('_test-user2@test.com')
+    })
 
     assert [
         dict(
