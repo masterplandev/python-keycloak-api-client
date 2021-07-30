@@ -122,42 +122,6 @@ class KeycloakApiClient:
                         f'{keycloak_id} (msg: {response.json()})'
                     )
 
-    def _get_user_by_email(self, email: str) -> Optional[dict]:
-        response = requests.get(
-            f'{self._get_users_url()}?email={parse.quote(email)}',
-            headers={'Authorization': self._get_authorization_header()}
-        )
-
-        if not response.ok:
-            raise KeycloakApiClientException(
-                f'Error while retrieving user with email {email} '
-                f'(msg: {response.json()})'
-            )
-
-        if len(response.json()) == 0:
-            return None
-
-        for user in response.json():
-            if user['email'] == email:
-                return user
-
-    def _get_user_by_id(self, id: UUID) -> Optional[dict]:
-        response = requests.get(
-            f'{self._get_users_url()}/{id}',
-            headers={'Authorization': self._get_authorization_header()}
-        )
-
-        if response.status_code == HTTPStatus.NOT_FOUND:
-            return None
-
-        if not response.ok:
-            raise KeycloakApiClientException(
-                f'Error while retrieving user with id {id} '
-                f'(msg: {response.json()})'
-            )
-
-        return response.json()
-
     def _get_user_endpoint_schema_data(
         self,
         write_keycloak_user: WriteKeycloakUser
@@ -189,25 +153,54 @@ class KeycloakApiClient:
 
         return data
 
-    def get_keycloak_user(
+    def get_keycloak_user_by_id(
         self,
-        email: Optional[str] = None,
         keycloak_id: Optional[UUID] = None
     ) -> Optional[ReadKeycloakUser]:
-        if email:
-            user_data = self._get_user_by_email(email=email)
-        elif keycloak_id:
-            user_data = self._get_user_by_id(id=keycloak_id)
-        else:
-            raise KeycloakApiClientException(
-                'Invalid get user call. '
-                'Email or Keycloak Id has to be specified.'
-            )
+        response = requests.get(
+            f'{self._get_users_url()}/{keycloak_id}',
+            headers={'Authorization': self._get_authorization_header()}
+        )
 
-        if not user_data:
+        if response.status_code == HTTPStatus.NOT_FOUND:
             return None
 
-        return read_keycloak_user_factory(user_endpoint_data=user_data)
+        if not response.ok:
+            raise KeycloakApiClientException(
+                f'Error while retrieving user with id {keycloak_id} '
+                f'(msg: {response.json()})'
+            )
+
+        if not response.json():
+            return None
+
+        return read_keycloak_user_factory(user_endpoint_data=response.json())
+
+    def get_keycloak_user_by_email(
+        self,
+        email: Optional[str] = None,
+    ) -> Optional[ReadKeycloakUser]:
+        response = requests.get(
+            f'{self._get_users_url()}?email={parse.quote(email)}',
+            headers={'Authorization': self._get_authorization_header()}
+        )
+
+        if not response.ok:
+            raise KeycloakApiClientException(
+                f'Error while retrieving user with email {email} '
+                f'(msg: {response.json()})'
+            )
+
+        if len(response.json()) == 0:
+            return None
+
+        user_data = next(
+            user for user in response.json()
+            if user['email'] == email
+        )
+
+        if user_data:
+            return read_keycloak_user_factory(user_endpoint_data=user_data)
 
     def register_user(self, write_keycloak_user: WriteKeycloakUser) -> UUID:
         response = requests.post(
