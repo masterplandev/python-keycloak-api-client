@@ -135,6 +135,13 @@ def test_get_existing_user():
 
 
 @pytest.mark.vcr()
+def test_get_not_existing_user_when_partially_matching_emails_returned():
+    assert _keycloak_api_client_factory().get_keycloak_user_by_email(
+        email='some-prefix-testname1@test.com'
+    ) is None
+
+
+@pytest.mark.vcr()
 def test_get_existing_user_by_keycloak_id():
     assert _keycloak_api_client_factory().get_keycloak_user_by_id(
         keycloak_id=UUID('11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf')
