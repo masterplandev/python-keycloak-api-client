@@ -194,13 +194,15 @@ class KeycloakApiClient:
         if len(response.json()) == 0:
             return None
 
-        user_data = next(
-            user for user in response.json()
-            if user['email'] == email
-        )
-
-        if user_data:
-            return read_keycloak_user_factory(user_endpoint_data=user_data)
+        try:
+            return read_keycloak_user_factory(
+                user_endpoint_data=next(
+                    user for user in response.json()
+                    if user['email'] == email
+                )
+            )
+        except StopIteration:
+            return None
 
     def register_user(self, write_keycloak_user: WriteKeycloakUser) -> UUID:
         response = requests.post(

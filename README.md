@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.2.1
+- Fixed `StopIteration` when downloading user by email in case email partially matches found users but not exact match exact email 
+
 ### v0.2.0
 - Method `get_keycloak_user` was replaced by `get_keycloak_user_by_id` and `get_keycloak_user_by_email`
 
