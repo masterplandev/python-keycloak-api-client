@@ -286,9 +286,12 @@ class KeycloakApiClient:
             refresh_token=data['refresh_token']
         )
 
-    def search_users(self, query: str) -> List[ReadKeycloakUser]:
+    def search_users(
+        self, query: str, limit: int = 100, offset: int = 0
+    ) -> List[ReadKeycloakUser]:
         response = requests.get(
-            f'{self._get_users_url()}?search={parse.quote(query)}',
+            self._get_users_url(),
+            params={'search': query, 'max': limit, 'first': offset},
             headers={'Authorization': self._get_authorization_header()}
         )
 

@@ -65,17 +65,17 @@ interactions:
       User-Agent:
       - python-requests/2.25.1
     method: GET
-    uri: http://localhost:8080/auth/admin/realms/my-realm/users?search=testname&max=100&first=0
+    uri: http://localhost:8080/auth/admin/realms/my-realm/users?search=testname&max=1&first=1
   response:
     body:
-      string: '[{"id":"7428411e-38c3-47da-9b2e-181502b7148f","createdTimestamp":1614767329366,"username":"testname1","enabled":true,"totp":false,"emailVerified":true,"firstName":"firstname","lastName":"lastname","email":"testname1@test.com","attributes":{"some_attrib":["val1"]},"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":true,"manage":true}},{"id":"11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf","createdTimestamp":1614767377821,"username":"testname2","enabled":true,"totp":false,"emailVerified":true,"firstName":"firstname1","lastName":"firstname2","email":"test2@test.com","attributes":{"other_attrib":["val2"]},"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":true,"manage":true}}]'
+      string: '[{"id":"11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf","createdTimestamp":1614767377821,"username":"testname2","enabled":true,"totp":false,"emailVerified":true,"firstName":"firstname1","lastName":"firstname2","email":"test2@test.com","attributes":{"other_attrib":["val2"]},"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":true,"manage":true}}]'
     headers:
       Cache-Control:
       - no-cache
       Connection:
       - keep-alive
       Content-Length:
-      - '865'
+      - '433'
       Content-Type:
       - application/json
       Date:
