@@ -119,6 +119,24 @@ def test_search_for_existing_user():
 
 
 @pytest.mark.vcr()
+def test_search_for_existing_user_with_limit_and_offset():
+    assert _keycloak_api_client_factory().search_users(
+        query='testname', limit=1, offset=1
+    ) == [
+        ReadKeycloakUser(
+            keycloak_id=UUID('11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf'),
+            username='testname2',
+            first_name='firstname1',
+            last_name='firstname2',
+            email='test2@test.com',
+            enabled=True,
+            email_verified=True,
+            raw_data=raw_user_2_data
+        ),
+    ]
+
+
+@pytest.mark.vcr()
 def test_get_existing_user():
     assert _keycloak_api_client_factory().get_keycloak_user_by_email(
         email='testname1@test.com'

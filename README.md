@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.2.2
+- Added `limit` and `offset` params in `KeycloakApiClient.search_users()` to control paging
+
 ### v0.2.1
 - Fixed `StopIteration` when downloading user by email in case email partially matches found users but not exact match exact email 
 
