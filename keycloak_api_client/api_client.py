@@ -51,6 +51,9 @@ class KeycloakApiClient:
     def _get_users_count_url(self) -> str:
         return f'{self._get_users_url()}/count'
 
+    def _get_user_password_reset_url(self, user_id: UUID) -> str:
+        return f'{self._get_users_url()}/{user_id}/reset-password'
+
     def _get_authorization_header(self) -> str:
         return f'Bearer {self._get_api_admin_oidc_token()}'
 
@@ -326,3 +329,29 @@ class KeycloakApiClient:
                 f"(msg: {response.json()})"
             )
         return response.json()
+
+    def reset_password(
+        self,
+        keycloak_id: UUID,
+        new_password: str,
+        temporary: Optional[bool] = False
+    ) -> None:
+        data = {
+            "type": "password",
+            "temporary": temporary,
+            "value": new_password
+        }
+        response = requests.put(
+            url=self._get_user_password_reset_url(user_id=keycloak_id),
+            data=json.dumps(data),
+            headers={
+                "Authorization": self._get_authorization_header(),
+                'Content-Type': 'application/json'
+            }
+        )
+        if not response.ok:
+            raise KeycloakApiClientException(
+                f"Error while resetting password for "
+                f"user with ID {keycloak_id}"
+                f"(msg: {response.json()})"
+            )
