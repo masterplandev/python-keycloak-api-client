@@ -48,6 +48,9 @@ class KeycloakApiClient:
     def _get_identities_url(self, user_id: UUID) -> str:
         return f'{self._get_users_url()}/{user_id}/federated-identity'
 
+    def _get_users_count_url(self) -> str:
+        return f'{self._get_users_url()}/count'
+
     def _get_authorization_header(self) -> str:
         return f'Bearer {self._get_api_admin_oidc_token()}'
 
@@ -305,3 +308,21 @@ class KeycloakApiClient:
             read_keycloak_user_factory(user_endpoint_data=user_data)
             for user_data in response.json()
         ]
+
+    def count_users(
+        self,
+        query: Optional[str] = None
+    ) -> List[ReadKeycloakUser]:
+        params = {"search": query} if query else None
+        response = requests.get(
+            self._get_users_count_url(),
+            params=params,
+            headers={"Authorization": self._get_authorization_header()}
+        )
+        if not response.ok:
+            raise KeycloakApiClientException(
+                f"Error while retrieving users count "
+                f"{'with query' + query if query else None}"
+                f"(msg: {response.json()})"
+            )
+        return response.json()

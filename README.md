@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.3.0
+- Added method `count_users`
+
 ### v0.2.2
 - Added `limit` and `offset` params in `KeycloakApiClient.search_users()` to control paging
 
