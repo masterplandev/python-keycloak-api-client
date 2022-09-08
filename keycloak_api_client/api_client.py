@@ -334,7 +334,7 @@ class KeycloakApiClient:
         self,
         keycloak_id: UUID,
         new_password: str,
-        temporary: Optional[bool] = False
+        temporary: bool = False
     ) -> None:
         data = {
             "type": "password",
@@ -343,11 +343,8 @@ class KeycloakApiClient:
         }
         response = requests.put(
             url=self._get_user_password_reset_url(user_id=keycloak_id),
-            data=json.dumps(data),
-            headers={
-                "Authorization": self._get_authorization_header(),
-                'Content-Type': 'application/json'
-            }
+            json=data,
+            headers={"Authorization": self._get_authorization_header()}
         )
         if not response.ok:
             raise KeycloakApiClientException(
