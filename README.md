@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.4.0
+- Added method `reset_password`
+
 ### v0.3.0
 - Added method `count_users`
 

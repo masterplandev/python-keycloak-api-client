@@ -10,6 +10,7 @@ from keycloak_api_client.data_classes import (
     ReadKeycloakUser,
     WriteKeycloakUser
 )
+from keycloak_api_client.exceptions import KeycloakApiClientException
 from keycloak_api_client.factories import read_keycloak_user_factory
 
 raw_user_1_data = {
@@ -295,3 +296,29 @@ def test_get_user_tokens():
 def test_count_users():
     assert _keycloak_api_client_factory().count_users() == 3
     assert _keycloak_api_client_factory().count_users(query='test') == 2
+
+
+@pytest.mark.vcr()
+def test_password_reset():
+    assert _keycloak_api_client_factory().reset_password(
+        keycloak_id=raw_user_1_data["id"],
+        new_password="test",
+        temporary=False
+    ) is None
+    keycloak_user = _keycloak_api_client_factory().search_users(
+        query=raw_user_1_data["username"])[0]
+    assert "UPDATE_PASSWORD" not in keycloak_user.raw_data["requiredActions"]
+    assert _keycloak_api_client_factory().reset_password(
+        keycloak_id=raw_user_1_data["id"],
+        new_password="test",
+        temporary=True
+    ) is None
+    keycloak_user = _keycloak_api_client_factory().search_users(
+        query=raw_user_1_data["username"])[0]
+    assert "UPDATE_PASSWORD" in keycloak_user.raw_data["requiredActions"]
+    with pytest.raises(KeycloakApiClientException):
+        _keycloak_api_client_factory().reset_password(
+            keycloak_id=raw_user_1_data["id"],
+            new_password="test",
+            temporary=True
+        )
