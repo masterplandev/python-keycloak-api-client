@@ -322,3 +322,20 @@ def test_password_reset():
             new_password="test",
             temporary=True
         )
+
+
+@pytest.mark.vcr()
+def test_send_verification_email():
+    assert _keycloak_api_client_factory().send_verification_email(
+        keycloak_id=raw_user_1_data['id']
+    ) is None
+
+    with pytest.raises(KeycloakApiClientException) as ex:
+        _keycloak_api_client_factory().send_verification_email(
+            keycloak_id=UUID('eae0c454-ebca-41df-8279-f0d282c31a44')
+        )
+    assert str(ex.value) == (
+        'Error while sending a verification email for user with ID '
+        'eae0c454-ebca-41df-8279-f0d282c31a44 '
+        '(msg: {\'error\': \'User not found\'})'
+    )

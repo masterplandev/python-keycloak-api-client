@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.5.0
+- Added method `send_verification_email`
+
 ### v0.4.0
 - Added method `reset_password`
 

@@ -54,6 +54,9 @@ class KeycloakApiClient:
     def _get_user_password_reset_url(self, user_id: UUID) -> str:
         return f'{self._get_users_url()}/{user_id}/reset-password'
 
+    def _get_send_verify_email_url(self, user_id: UUID) -> str:
+        return f'{self._get_users_url()}/{user_id}/send-verify-email'
+
     def _get_authorization_header(self) -> str:
         return f'Bearer {self._get_api_admin_oidc_token()}'
 
@@ -351,4 +354,32 @@ class KeycloakApiClient:
                 f"Error while resetting password for "
                 f"user with ID {keycloak_id}"
                 f"(msg: {response.json()})"
+            )
+
+    def send_verification_email(
+        self,
+        keycloak_id: UUID,
+        client_id: Optional[str] = None,
+        redirect_uri: Optional[str] = None,
+    ) -> None:
+        """
+        Send an email-verification email to the user. An email contains a link
+        the user can click to verify their email address.
+        """
+
+        params = {
+            'client_id': client_id if client_id else None,
+            'redirect_uri': redirect_uri if redirect_uri else None
+        }
+
+        response = requests.put(
+            self._get_send_verify_email_url(user_id=keycloak_id),
+            headers={'Authorization': self._get_authorization_header()},
+            params=params if params else None
+        )
+
+        if not response.ok:
+            raise KeycloakApiClientException(
+                f'Error while sending a verification email for '
+                f'user with ID {keycloak_id} (msg: {response.json()})'
             )
