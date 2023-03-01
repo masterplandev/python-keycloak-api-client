@@ -57,6 +57,13 @@ class KeycloakApiClient:
     def _get_send_verify_email_url(self, user_id: UUID) -> str:
         return f'{self._get_users_url()}/{user_id}/send-verify-email'
 
+    def _get_clients_url(self) -> str:
+        return f'{self.keycloak_url}/auth/admin/realms/{self.realm}/clients'
+
+    def _get_client_mappers_url(self, id_of_client: UUID) -> str:
+        return f'{self._get_clients_url()}/{id_of_client}' \
+               f'/protocol-mappers/models'
+
     def _get_authorization_header(self) -> str:
         return f'Bearer {self._get_api_admin_oidc_token()}'
 
@@ -382,4 +389,65 @@ class KeycloakApiClient:
             raise KeycloakApiClientException(
                 f'Error while sending a verification email for '
                 f'user with ID {keycloak_id} (msg: {response.json()})'
+            )
+
+    def create_client(
+        self,
+        client_id: str,
+        client_secret: str,
+        **kwargs
+    ) -> None:
+        """
+        Creates new client with passed client_id and client_secret.
+        Pass additional data to attach it to request payload.
+        """
+
+        data = {
+            "clientId": client_id,
+            "secret": client_secret,
+            **kwargs
+        }
+
+        response = requests.post(
+            self._get_clients_url(),
+            data=json.dumps(data),
+            headers={
+                'Authorization': self._get_authorization_header(),
+                'Content-Type': 'application/json'
+            }
+        )
+        if not response.ok:
+            raise KeycloakApiClientException(
+                f'Error while creating new client with data={data}'
+            )
+
+    def create_mapper_for_client(
+        self,
+        name: str,
+        id_of_client: UUID,
+        protocol: str,
+        protocol_mapper: str,
+        config: dict,
+    ) -> None:
+        """
+        Creates new mapper for client.
+        """
+        data = {
+            "protocol": protocol,
+            "config": config,
+            "name": name,
+            "protocolMapper": protocol_mapper
+        }
+
+        response = requests.post(
+            self._get_client_mappers_url(id_of_client=id_of_client),
+            data=json.dumps(data),
+            headers={
+                'Authorization': self._get_authorization_header(),
+                'Content-Type': 'application/json'
+            }
+        )
+        if not response.ok:
+            raise KeycloakApiClientException(
+                f'Error while creating client mapper with data={data}'
             )
