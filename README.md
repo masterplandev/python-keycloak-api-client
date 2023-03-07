@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.6.0
+- Added methods `create_client` and `create_mapper_for_client`
+
 ### v0.5.0
 - Added method `send_verification_email`
 

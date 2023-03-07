@@ -339,3 +339,75 @@ def test_send_verification_email():
         'eae0c454-ebca-41df-8279-f0d282c31a44 '
         '(msg: {\'error\': \'User not found\'})'
     )
+
+
+@pytest.mark.vcr()
+def test_create_client_and_create_mapper():
+    client_id = "test_client_id"
+    client_secret = "test_secret"
+    id_of_client = UUID("00000000-0000-0000-0000-000000000000")
+    wrong_id_of_client = UUID("00000000-0000-0000-0000-000000000001")
+    _keycloak_api_client_factory()._get_authorization_header(
+    )
+    assert _keycloak_api_client_factory().create_client(
+        client_id=client_id,
+        client_secret=client_secret,
+        id=str(id_of_client)
+    ) is None
+
+    with pytest.raises(KeycloakApiClientException) as ex:
+        _keycloak_api_client_factory().create_client(
+            client_id=client_id,
+            client_secret=client_secret,
+            id=str(id_of_client)
+        )
+
+    assert str(ex.value) == (
+        "Error while creating new client "
+        "with data={'clientId': 'test_client_id', "
+        "'secret': 'test_secret', 'id': "
+        "'00000000-0000-0000-0000-000000000000'}"
+    )
+
+    protocol = "openid-connect"
+    config = {
+        "access.token.claim": "true",
+        "access.tokenResponse.claim": "false",
+        "claim.name": "test_mapper",
+        "claim.value": "any_value",
+        "id.token.claim": "false",
+        "userinfo.token.claim": "false"
+    }
+    name = "Test mapper"
+    protocol_mapper = "oidc-hardcoded-claim-mapper"
+
+    assert _keycloak_api_client_factory().create_mapper_for_client(
+        name=name,
+        protocol=protocol,
+        config=config,
+        protocol_mapper=protocol_mapper,
+        id_of_client=id_of_client
+    ) is None
+
+    with pytest.raises(KeycloakApiClientException) as ex:
+        _keycloak_api_client_factory().create_mapper_for_client(
+            name=name,
+            protocol=protocol,
+            config=config,
+            protocol_mapper=protocol_mapper,
+            id_of_client=wrong_id_of_client
+        )
+
+    assert str(ex.value) == (
+        "Error while creating client mapper with "
+        "data={'protocol': 'openid-connect', "
+        "'config': {'access.token.claim': 'true', "
+        "'access.tokenResponse.claim': "
+        "'false', 'claim.name': 'test_mapper', "
+        "'claim.value': 'any_value', "
+        "'id.token.claim': 'false', "
+        "'userinfo.token.claim': 'false'}, "
+        "'name': 'Test "
+        "mapper', 'protocolMapper': "
+        "'oidc-hardcoded-claim-mapper'}"
+    )
