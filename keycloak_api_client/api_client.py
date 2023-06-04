@@ -7,13 +7,17 @@ from uuid import UUID
 import requests
 
 from keycloak_api_client.data_classes import (
+    KeycloakClient,
     KeycloakFederatedIdentity,
     KeycloakTokens,
     WriteKeycloakUser,
     ReadKeycloakUser
 )
 from keycloak_api_client.exceptions import KeycloakApiClientException
-from keycloak_api_client.factories import read_keycloak_user_factory
+from keycloak_api_client.factories import (
+    keycloak_client_factory,
+    read_keycloak_user_factory
+)
 
 
 class KeycloakApiClient:
@@ -59,6 +63,9 @@ class KeycloakApiClient:
 
     def _get_clients_url(self) -> str:
         return f'{self.keycloak_url}/auth/admin/realms/{self.realm}/clients'
+
+    def _get_client_url(self, id_of_client: UUID) -> str:
+        return f'{self._get_clients_url()}/{id_of_client}'
 
     def _get_client_mappers_url(self, id_of_client: UUID) -> str:
         return f'{self._get_clients_url()}/{id_of_client}' \
@@ -450,4 +457,38 @@ class KeycloakApiClient:
         if not response.ok:
             raise KeycloakApiClientException(
                 f'Error while creating client mapper with data={data}'
+            )
+
+    def search_clients_by_client_id(
+        self,
+        client_id: str
+    ) -> List[KeycloakClient]:
+
+        response = requests.get(
+            self._get_clients_url(),
+            params={
+                "clientId": client_id,
+                "search": True
+            },
+            headers={'Authorization': self._get_authorization_header()}
+        )
+        if not response.ok:
+            raise KeycloakApiClientException(
+                'Error while retrieving client data by clientId '
+                f'(clientId: {client_id})'
+            )
+        return [
+            keycloak_client_factory(client) for client in response.json()
+        ]
+
+    def delete_client(self, id_of_client: UUID) -> None:
+        response = requests.delete(
+            self._get_client_url(id_of_client=id_of_client),
+            headers={'Authorization': self._get_authorization_header()}
+        )
+        if not response.ok:
+            raise KeycloakApiClientException(
+                'Error while deleting client '
+                f'with ID={id_of_client}) '
+                f'response code={response.status_code}'
             )

@@ -23,6 +23,10 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.7.0
+- Added methods `search_clients_by_client_id` and `delete_client`
+- Added `KeycloakClient` dataclass
+
 ### v0.6.0
 - Added methods `create_client` and `create_mapper_for_client`
 
