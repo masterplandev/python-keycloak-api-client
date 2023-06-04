@@ -40,3 +40,11 @@ class ReadKeycloakUser(BaseKeycloakUser):
 class KeycloakTokens:
     access_token: str
     refresh_token: str
+
+
+@attr.s(auto_attribs=True)
+class KeycloakClient:
+    keycloak_id: UUID
+    client_id: str
+    enabled: bool
+    service_account_enabled: bool
