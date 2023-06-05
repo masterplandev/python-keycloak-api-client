@@ -5,6 +5,7 @@ import pytest
 
 from keycloak_api_client import KeycloakApiClient
 from keycloak_api_client.data_classes import (
+    KeycloakClient,
     KeycloakFederatedIdentity,
     KeycloakTokens,
     ReadKeycloakUser,
@@ -53,6 +54,38 @@ raw_user_2_data = {
         "manageGroupMembership": True, "view": True,
         "mapRoles": True, "impersonate": True, "manage": True
     }
+}
+
+raw_existing_client_data = {
+    'access': {'configure': True, 'manage': True, 'view': True},
+    'alwaysDisplayInConsole': False,
+    'attributes': {'backchannel.logout.revoke.offline.tokens': 'false',
+                   'backchannel.logout.session.required': 'true'},
+    'authenticationFlowBindingOverrides': {},
+    'bearerOnly': False,
+    'clientAuthenticatorType': 'client-secret',
+    'clientId': 'existing_client_id',
+    'consentRequired': False,
+    'defaultClientScopes': ['web-origins', 'acr', 'roles', 'profile', 'email'],
+    'directAccessGrantsEnabled': True,
+    'enabled': True,
+    'frontchannelLogout': False,
+    'fullScopeAllowed': True,
+    'id': '15d9cce8-2e11-4f37-adde-cb686d037a60',
+    'implicitFlowEnabled': False,
+    'nodeReRegistrationTimeout': -1,
+    'notBefore': 0,
+    'optionalClientScopes': ['address',
+                             'phone',
+                             'offline_access',
+                             'microprofile-jwt'],
+    'protocol': 'openid-connect',
+    'publicClient': True,
+    'redirectUris': [],
+    'serviceAccountsEnabled': False,
+    'standardFlowEnabled': True,
+    'surrogateAuthRequired': False,
+    'webOrigins': []
 }
 
 
@@ -410,4 +443,46 @@ def test_create_client_and_create_mapper():
         "'name': 'Test "
         "mapper', 'protocolMapper': "
         "'oidc-hardcoded-claim-mapper'}"
+    )
+
+
+@pytest.mark.vcr()
+def test_search_clients_by_client_id():
+    existing_client_id = "existing_client_id"
+    non_existing_client_id = "not_existing_client_id"
+    keycloak_api_client = _keycloak_api_client_factory()
+    assert keycloak_api_client.search_clients_by_client_id(
+        client_id=existing_client_id
+    ) == [
+        KeycloakClient(
+            keycloak_id=UUID(raw_existing_client_data["id"]),
+            client_id=raw_existing_client_data["clientId"],
+            enabled=raw_existing_client_data["enabled"],
+            service_account_enabled=(
+                raw_existing_client_data["serviceAccountsEnabled"]
+            )
+        )
+    ]
+    assert keycloak_api_client.search_clients_by_client_id(
+        client_id=non_existing_client_id
+    ) == []
+
+
+@pytest.mark.vcr()
+def test_delete_client():
+    keycloak_api_client = _keycloak_api_client_factory()
+
+    with pytest.raises(KeycloakApiClientException) as ex:
+        keycloak_api_client.delete_client(
+            id_of_client=UUID("00000000-0000-0000-0000-000000000000")
+        )
+
+    assert str(ex.value) == (
+        "Error while deleting client with "
+        "ID=00000000-0000-0000-0000-000000000000) "
+        "response code=404"
+    )
+
+    keycloak_api_client.delete_client(
+        id_of_client=raw_existing_client_data['id']
     )
