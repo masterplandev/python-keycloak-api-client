@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.7.1
+- Change `client_id` value in `get_user_tokens`
+
 ### v0.7.0
 - Added methods `search_clients_by_client_id` and `delete_client`
 - Added `KeycloakClient` dataclass
