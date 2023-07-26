@@ -290,7 +290,7 @@ class KeycloakApiClient:
                               ':token-exchange',
                 'requested_subject': str(keycloak_id),
                 'subject_token': self._get_api_admin_oidc_token(),
-                'client_id': self.token_exchange_target_client_id,
+                'client_id': self.admin_client_id,
                 'client_secret': self.admin_client_secret,
             },
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
