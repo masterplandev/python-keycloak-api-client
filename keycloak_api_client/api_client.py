@@ -92,11 +92,11 @@ class KeycloakApiClient:
                 'Missing client_id'
             )
         data = {
-                'grant_type': 'password',
-                'username': self.admin_username,
-                'password': self.admin_password,
-                'client_id': client_id
-            }
+            'grant_type': 'password',
+            'username': self.admin_username,
+            'password': self.admin_password,
+            'client_id': client_id
+        }
         if client_secret:
             data['client_secret'] = client_secret
         response = requests.post(
@@ -317,16 +317,16 @@ class KeycloakApiClient:
             target_client_id = self.token_exchange_target_client_id
 
         data = {
-                'audience': target_client_id,
-                'grant_type': 'urn:ietf:params:oauth:grant-type'
-                              ':token-exchange',
-                'requested_subject': str(keycloak_id),
-                'subject_token': self._get_api_admin_oidc_token(
-                    client_id=starting_client_id,
-                    client_secret=starting_client_secret
-                ),
-                'client_id': starting_client_id
-            }
+            'audience': target_client_id,
+            'grant_type': 'urn:ietf:params:oauth:grant-type'
+                          ':token-exchange',
+            'requested_subject': str(keycloak_id),
+            'subject_token': self._get_api_admin_oidc_token(
+                client_id=starting_client_id,
+                client_secret=starting_client_secret
+            ),
+            'client_id': starting_client_id
+        }
 
         if starting_client_secret:
             data['client_secret'] = starting_client_secret
