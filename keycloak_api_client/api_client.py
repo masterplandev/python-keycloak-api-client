@@ -74,19 +74,34 @@ class KeycloakApiClient:
     def _get_authorization_header(self) -> str:
         return f'Bearer {self._get_api_admin_oidc_token()}'
 
-    def _get_api_admin_oidc_token(self) -> str:
+    def _get_api_admin_oidc_token(
+        self,
+        client_id: Optional[str] = None,
+        client_secret: Optional[str] = None
+    ) -> str:
+
         if self.admin_user_access_token:
             return self.admin_user_access_token
 
-        response = requests.post(
-            self._get_token_url(),
-            data={
+        if not client_id and not client_secret:
+            client_id = self.admin_client_id
+            client_secret = self.admin_client_secret
+
+        elif not client_id and client_secret:
+            raise KeycloakApiClientException(
+                'Missing client_id'
+            )
+        data = {
                 'grant_type': 'password',
                 'username': self.admin_username,
                 'password': self.admin_password,
-                'client_id': self.admin_client_id,
-                'client_secret': self.admin_client_secret
-            },
+                'client_id': client_id
+            }
+        if client_secret:
+            data['client_secret'] = client_secret
+        response = requests.post(
+            self._get_token_url(),
+            data=data,
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
 
@@ -281,18 +296,44 @@ class KeycloakApiClient:
                 federated_identities=write_keycloak_user.federated_identities
             )
 
-    def get_user_tokens(self, keycloak_id: UUID) -> KeycloakTokens:
-        response = requests.post(
-            self._get_token_url(),
-            data={
-                'audience': self.token_exchange_target_client_id,
+    def get_user_tokens(
+            self,
+            keycloak_id: UUID,
+            starting_client_id: Optional[str] = None,
+            starting_client_secret: Optional[str] = None,
+            target_client_id: Optional[str] = None
+    ) -> KeycloakTokens:
+
+        if not starting_client_id and not starting_client_secret:
+            starting_client_id = self.admin_client_id
+            starting_client_secret = self.admin_client_secret
+
+        elif not starting_client_id and starting_client_secret:
+            raise KeycloakApiClientException(
+                'Missing client_id'
+            )
+
+        if not target_client_id:
+            target_client_id = self.token_exchange_target_client_id
+
+        data = {
+                'audience': target_client_id,
                 'grant_type': 'urn:ietf:params:oauth:grant-type'
                               ':token-exchange',
                 'requested_subject': str(keycloak_id),
-                'subject_token': self._get_api_admin_oidc_token(),
-                'client_id': self.admin_client_id,
-                'client_secret': self.admin_client_secret,
-            },
+                'subject_token': self._get_api_admin_oidc_token(
+                    client_id=starting_client_id,
+                    client_secret=starting_client_secret
+                ),
+                'client_id': starting_client_id
+            }
+
+        if starting_client_secret:
+            data['client_secret'] = starting_client_secret
+
+        response = requests.post(
+            self._get_token_url(),
+            data=data,
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
 
