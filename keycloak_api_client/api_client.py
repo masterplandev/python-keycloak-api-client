@@ -72,25 +72,20 @@ class KeycloakApiClient:
                f'/protocol-mappers/models'
 
     def _get_authorization_header(self) -> str:
-        return f'Bearer {self._get_api_admin_oidc_token()}'
+        return 'Bearer ' + self._get_api_admin_oidc_token(
+            client_id=self.admin_client_id,
+            client_secret=self.admin_client_secret
+        )
 
     def _get_api_admin_oidc_token(
         self,
-        client_id: Optional[str] = None,
+        client_id: str,
         client_secret: Optional[str] = None
     ) -> str:
 
         if self.admin_user_access_token:
             return self.admin_user_access_token
 
-        if not client_id and not client_secret:
-            client_id = self.admin_client_id
-            client_secret = self.admin_client_secret
-
-        elif not client_id and client_secret:
-            raise KeycloakApiClientException(
-                'Missing client_id'
-            )
         data = {
             'grant_type': 'password',
             'username': self.admin_username,
@@ -299,22 +294,10 @@ class KeycloakApiClient:
     def get_user_tokens(
             self,
             keycloak_id: UUID,
-            starting_client_id: Optional[str] = None,
+            starting_client_id: str,
+            target_client_id: str,
             starting_client_secret: Optional[str] = None,
-            target_client_id: Optional[str] = None
     ) -> KeycloakTokens:
-
-        if not starting_client_id and not starting_client_secret:
-            starting_client_id = self.admin_client_id
-            starting_client_secret = self.admin_client_secret
-
-        elif not starting_client_id and starting_client_secret:
-            raise KeycloakApiClientException(
-                'Missing client_id'
-            )
-
-        if not target_client_id:
-            target_client_id = self.token_exchange_target_client_id
 
         data = {
             'audience': target_client_id,
