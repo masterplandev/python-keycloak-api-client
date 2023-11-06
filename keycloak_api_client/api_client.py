@@ -72,21 +72,31 @@ class KeycloakApiClient:
                f'/protocol-mappers/models'
 
     def _get_authorization_header(self) -> str:
-        return f'Bearer {self._get_api_admin_oidc_token()}'
+        return 'Bearer ' + self._get_api_admin_oidc_token(
+            client_id=self.admin_client_id,
+            client_secret=self.admin_client_secret
+        )
 
-    def _get_api_admin_oidc_token(self) -> str:
+    def _get_api_admin_oidc_token(
+        self,
+        client_id: str,
+        client_secret: Optional[str] = None
+    ) -> str:
+
         if self.admin_user_access_token:
             return self.admin_user_access_token
 
+        data = {
+            'grant_type': 'password',
+            'username': self.admin_username,
+            'password': self.admin_password,
+            'client_id': client_id
+        }
+        if client_secret:
+            data['client_secret'] = client_secret
         response = requests.post(
             self._get_token_url(),
-            data={
-                'grant_type': 'password',
-                'username': self.admin_username,
-                'password': self.admin_password,
-                'client_id': self.admin_client_id,
-                'client_secret': self.admin_client_secret
-            },
+            data=data,
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
 
@@ -281,18 +291,32 @@ class KeycloakApiClient:
                 federated_identities=write_keycloak_user.federated_identities
             )
 
-    def get_user_tokens(self, keycloak_id: UUID) -> KeycloakTokens:
+    def get_user_tokens(
+            self,
+            keycloak_id: UUID,
+            starting_client_id: str,
+            target_client_id: str,
+            starting_client_secret: Optional[str] = None,
+    ) -> KeycloakTokens:
+
+        data = {
+            'audience': target_client_id,
+            'grant_type': 'urn:ietf:params:oauth:grant-type'
+                          ':token-exchange',
+            'requested_subject': str(keycloak_id),
+            'subject_token': self._get_api_admin_oidc_token(
+                client_id=starting_client_id,
+                client_secret=starting_client_secret
+            ),
+            'client_id': starting_client_id
+        }
+
+        if starting_client_secret:
+            data['client_secret'] = starting_client_secret
+
         response = requests.post(
             self._get_token_url(),
-            data={
-                'audience': self.token_exchange_target_client_id,
-                'grant_type': 'urn:ietf:params:oauth:grant-type'
-                              ':token-exchange',
-                'requested_subject': str(keycloak_id),
-                'subject_token': self._get_api_admin_oidc_token(),
-                'client_id': self.admin_client_id,
-                'client_secret': self.admin_client_secret,
-            },
+            data=data,
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
 
