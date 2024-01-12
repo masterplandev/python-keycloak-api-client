@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.8.1
+- Clear `admin_user_access_token` before using token-exchange feature.
+
 ### v0.8.0
 - Allow to define starting `client_id` / `client_secret` when using token-exchange feature
 

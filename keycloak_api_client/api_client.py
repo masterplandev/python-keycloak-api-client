@@ -77,6 +77,10 @@ class KeycloakApiClient:
             client_secret=self.admin_client_secret
         )
 
+    def _clear_admin_user_access_token(self) -> None:
+        if self.admin_user_access_token:
+            self.admin_user_access_token = None
+
     def _get_api_admin_oidc_token(
         self,
         client_id: str,
@@ -298,6 +302,8 @@ class KeycloakApiClient:
             target_client_id: str,
             starting_client_secret: Optional[str] = None,
     ) -> KeycloakTokens:
+
+        self._clear_admin_user_access_token()
 
         data = {
             'audience': target_client_id,
