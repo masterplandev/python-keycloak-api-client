@@ -498,3 +498,23 @@ def test_delete_client():
     keycloak_api_client.delete_client(
         id_of_client=raw_existing_client_data['id']
     )
+
+
+@pytest.mark.vcr()
+def test_delete_user():
+    keycloak_api_client = _keycloak_api_client_factory()
+
+    with pytest.raises(KeycloakApiClientException) as ex:
+        keycloak_api_client.delete_user(
+            user_id=UUID("00000000-0000-0000-0000-000000000000")
+        )
+
+    assert str(ex.value) == (
+        "Error while deleting user with "
+        "ID=00000000-0000-0000-0000-000000000000) "
+        "response code=404"
+    )
+
+    keycloak_api_client.delete_user(
+        user_id=raw_user_1_data['id']
+    )

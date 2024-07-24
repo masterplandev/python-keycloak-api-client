@@ -23,6 +23,9 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.9.0
+- Added `delete_user` method.
+
 ### v0.8.1
 - Clear `admin_user_access_token` before using token-exchange feature.
 
