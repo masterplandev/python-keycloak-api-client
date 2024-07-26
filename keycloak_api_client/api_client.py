@@ -49,6 +49,9 @@ class KeycloakApiClient:
     def _get_users_url(self) -> str:
         return f'{self.keycloak_url}/auth/admin/realms/{self.realm}/users'
 
+    def _get_user_url(self, user_id: UUID) -> str:
+        return f'{self._get_users_url()}/{user_id}'
+
     def _get_identities_url(self, user_id: UUID) -> str:
         return f'{self._get_users_url()}/{user_id}/federated-identity'
 
@@ -520,5 +523,17 @@ class KeycloakApiClient:
             raise KeycloakApiClientException(
                 'Error while deleting client '
                 f'with ID={id_of_client}) '
+                f'response code={response.status_code}'
+            )
+
+    def delete_user(self, user_id: UUID) -> None:
+        response = requests.delete(
+            url=self._get_user_url(user_id=user_id),
+            headers={'Authorization': self._get_authorization_header()}
+        )
+        if not response.ok:
+            raise KeycloakApiClientException(
+                'Error while deleting user '
+                f'with ID={user_id}) '
                 f'response code={response.status_code}'
             )
