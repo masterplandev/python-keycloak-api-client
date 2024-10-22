@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.11.0
-- Dropped support for Python `3.7` and `3.8`
+- Dropped support for older Python versions (`3.7`, `3.8` and `3.9`)
 - Adjusted typing for modern Python
 
 ## v0.10.1
