@@ -11,7 +11,7 @@ jobs:
       tox_cmd:
         type: string
     docker:
-      - image: << parameters.python_version >>
+      - image: << parameters.docker_image >>
     steps:
       - checkout
       - run: python setup.py bdist_wheel
@@ -54,10 +54,10 @@ workflows:
       - approve_pypi_distribution:
           type: approval
           requires:
-            - test_py39
-            - test_py310
-            - test_py311
-            - test_py312
+            - test_python_39
+            - test_python_310
+            - test_python_311
+            - test_python_312
           filters:
             branches:
               only:
