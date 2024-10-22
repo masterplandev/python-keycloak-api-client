@@ -1,6 +1,5 @@
 import json
 from http import HTTPStatus
-from typing import List, Optional
 from urllib import parse
 from uuid import UUID
 
@@ -84,7 +83,7 @@ class KeycloakApiClient:
             self.admin_user_access_token = None
 
     def _get_api_admin_oidc_token(
-        self, client_id: str, client_secret: Optional[str] = None
+        self, client_id: str, client_secret: str | None = None
     ) -> str:
         if self.admin_user_access_token:
             return self.admin_user_access_token
@@ -113,7 +112,7 @@ class KeycloakApiClient:
 
         return self.admin_user_access_token
 
-    def _get_user_identities(self, keycloak_id: UUID) -> List[dict]:
+    def _get_user_identities(self, keycloak_id: UUID) -> list[dict[str, str]]:
         response = requests.get(
             self._get_identities_url(user_id=keycloak_id),
             headers={"Authorization": self._get_authorization_header()},
@@ -128,7 +127,7 @@ class KeycloakApiClient:
         return response.json()
 
     def _update_user_identities(
-        self, keycloak_id: UUID, federated_identities: List[KeycloakFederatedIdentity]
+        self, keycloak_id: UUID, federated_identities: list[KeycloakFederatedIdentity]
     ):
         keycloak_identities = {
             i["identityProvider"]: i for i in self._get_user_identities(keycloak_id)
@@ -159,7 +158,7 @@ class KeycloakApiClient:
 
     def _get_user_endpoint_schema_data(
         self, write_keycloak_user: WriteKeycloakUser
-    ) -> dict:
+    ) -> dict[str, str]:
         data = {
             "username": write_keycloak_user.username,
             "firstName": write_keycloak_user.first_name,
@@ -192,8 +191,8 @@ class KeycloakApiClient:
         return data
 
     def get_keycloak_user_by_id(
-        self, keycloak_id: Optional[UUID] = None
-    ) -> Optional[ReadKeycloakUser]:
+        self, keycloak_id: UUID | None = None
+    ) -> ReadKeycloakUser | None:
         response = requests.get(
             f"{self._get_users_url()}/{keycloak_id}",
             headers={"Authorization": self._get_authorization_header()},
@@ -215,8 +214,8 @@ class KeycloakApiClient:
 
     def get_keycloak_user_by_email(
         self,
-        email: Optional[str] = None,
-    ) -> Optional[ReadKeycloakUser]:
+        email: str | None = None,
+    ) -> ReadKeycloakUser | None:
         response = requests.get(
             f"{self._get_users_url()}?email={parse.quote(email)}",
             headers={"Authorization": self._get_authorization_header()},
@@ -299,7 +298,7 @@ class KeycloakApiClient:
         keycloak_id: UUID,
         starting_client_id: str,
         target_client_id: str,
-        starting_client_secret: Optional[str] = None,
+        starting_client_secret: str | None = None,
     ) -> KeycloakTokens:
         self._clear_admin_user_access_token()
 
@@ -336,7 +335,7 @@ class KeycloakApiClient:
 
     def search_users(
         self, query: str, limit: int = 100, offset: int = 0
-    ) -> List[ReadKeycloakUser]:
+    ) -> list[ReadKeycloakUser]:
         response = requests.get(
             self._get_users_url(),
             params={"search": query, "max": limit, "first": offset},
@@ -354,7 +353,7 @@ class KeycloakApiClient:
             for user_data in response.json()
         ]
 
-    def count_users(self, query: Optional[str] = None) -> List[ReadKeycloakUser]:
+    def count_users(self, query: str | None = None) -> list[ReadKeycloakUser]:
         params = {"search": query} if query else None
         response = requests.get(
             self._get_users_count_url(),
@@ -388,8 +387,8 @@ class KeycloakApiClient:
     def send_verification_email(
         self,
         keycloak_id: UUID,
-        client_id: Optional[str] = None,
-        redirect_uri: Optional[str] = None,
+        client_id: str | None = None,
+        redirect_uri: str | None = None,
     ) -> None:
         """
         Send an email-verification email to the user. An email contains a link
@@ -440,7 +439,7 @@ class KeycloakApiClient:
         id_of_client: UUID,
         protocol: str,
         protocol_mapper: str,
-        config: dict,
+        config: dict[str, str],
     ) -> None:
         """
         Creates new mapper for client.

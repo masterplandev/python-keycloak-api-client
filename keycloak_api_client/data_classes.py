@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import UUID
 
 import attr
@@ -23,17 +22,17 @@ class BaseKeycloakUser:
 
 @attr.s(auto_attribs=True)
 class WriteKeycloakUser(BaseKeycloakUser):
-    attributes: Optional[dict]
-    keycloak_id: Optional[UUID] = None
-    raw_password: Optional[str] = None
-    hashed_password: Optional[str] = None
-    federated_identities: Optional[List[KeycloakFederatedIdentity]] = None
+    attributes: dict[str, str] | None
+    keycloak_id: UUID | None = None
+    raw_password: str | None = None
+    hashed_password: str | None = None
+    federated_identities: list[KeycloakFederatedIdentity] | None = None
 
 
 @attr.s(auto_attribs=True)
 class ReadKeycloakUser(BaseKeycloakUser):
     keycloak_id: UUID
-    raw_data: dict
+    raw_data: dict[str, str]
 
 
 @attr.s(auto_attribs=True)
