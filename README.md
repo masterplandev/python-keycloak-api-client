@@ -21,6 +21,7 @@ client = KeycloakApiClient(
     admin_client_id: "my_service_backend_client_id",
     admin_client_secret: "...",
     token_exchange_target_client_id: "my_service_backend_client_id",
+    relative_path: "/auth",
 )
 
 read_kc_user = client.get_keycloak_user_by_email('johndoe@myservice.com')
@@ -36,7 +37,7 @@ read_kc_user.last_name  # Doe
 ### Test
 
 ```bash
-# Runs tests for all Python versions and checks linter
+# Run linter and tests for all Python versions
 $ tox
 ```
 

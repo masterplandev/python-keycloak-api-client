@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.12.0
-- Povided option for [relative path](https://www.keycloak.org/server/all-config?q=relative-path) configuration
+- Provided option for [relative path](https://www.keycloak.org/server/all-config?q=relative-path) configuration
 - Adjusted scope of client private properties
 - Provided extra consistency when casting responses to objects
 
