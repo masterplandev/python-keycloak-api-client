@@ -106,9 +106,9 @@ def _keycloak_api_client_factory():
 
 def _get_keycloak_user_fixture(
     suffix: str,
-    federated_identities: list[KeycloakFederatedIdentity]] | None = None,
-    keycloak_id: UUID | None  = None,
-    hashed_password: str | None  = None,
+    federated_identities: list[KeycloakFederatedIdentity] | None = None,
+    keycloak_id: UUID | None = None,
+    hashed_password: str | None = None,
 ) -> WriteKeycloakUser:
     return WriteKeycloakUser(
         username=f"_username{suffix}",
