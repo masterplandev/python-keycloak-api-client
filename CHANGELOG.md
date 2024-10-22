@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.12.0
+- Provided option for [relative path](https://www.keycloak.org/server/all-config?q=relative-path) configuration
+- Adjusted scope of client private properties
+- Provided extra consistency when casting responses to objects
+- Deleted unused `token_exchange_target_client_id` attribute
+
 ## v0.11.0
 - Dropped support for older Python versions (`3.7`, `3.8` and `3.9`)
 - Adjusted typing for modern Python

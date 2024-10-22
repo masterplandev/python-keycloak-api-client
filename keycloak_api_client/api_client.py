@@ -20,7 +20,15 @@ from keycloak_api_client.factories import (
 
 
 class KeycloakApiClient:
-    admin_user_access_token = None
+    _keycloak_url: str
+    _realm: str
+    _admin_username: str
+    _admin_password: str
+    _admin_client_id: str
+    _admin_client_secret: str
+    _relative_path: str | None
+
+    _admin_user_access_token: str | None = None
 
     def __init__(
         self,
@@ -30,24 +38,29 @@ class KeycloakApiClient:
         admin_password: str,
         admin_client_id: str,
         admin_client_secret: str,
-        token_exchange_target_client_id: str,
+        relative_path: str | None,
     ):
-        self.keycloak_url = keycloak_url
-        self.realm = realm
-        self.admin_username = admin_username
-        self.admin_password = admin_password
-        self.admin_client_id = admin_client_id
-        self.admin_client_secret = admin_client_secret
-        self.token_exchange_target_client_id = token_exchange_target_client_id
+        self._keycloak_url = keycloak_url
+        self._realm = realm
+        self._admin_username = admin_username
+        self._admin_password = admin_password
+        self._admin_client_id = admin_client_id
+        self._admin_client_secret = admin_client_secret
+        self._relative_path = relative_path
+
+    def _get_base_url(self) -> str:
+        if self._relative_path:
+            return f"{self._keycloak_url}{self._relative_path}"
+        return f"{self._keycloak_url}"
 
     def _get_token_url(self) -> str:
         return (
-            f"{self.keycloak_url}/auth/realms/{self.realm}"
+            f"{self._get_base_url()}/realms/{self._realm}"
             "/protocol/openid-connect/token"
         )
 
     def _get_users_url(self) -> str:
-        return f"{self.keycloak_url}/auth/admin/realms/{self.realm}/users"
+        return f"{self._get_base_url()}/admin/realms/{self._realm}/users"
 
     def _get_user_url(self, user_id: UUID) -> str:
         return f"{self._get_users_url()}/{user_id}"
@@ -65,7 +78,7 @@ class KeycloakApiClient:
         return f"{self._get_users_url()}/{user_id}/send-verify-email"
 
     def _get_clients_url(self) -> str:
-        return f"{self.keycloak_url}/auth/admin/realms/{self.realm}/clients"
+        return f"{self._get_base_url()}/admin/realms/{self._realm}/clients"
 
     def _get_client_url(self, id_of_client: UUID) -> str:
         return f"{self._get_clients_url()}/{id_of_client}"
@@ -75,27 +88,28 @@ class KeycloakApiClient:
 
     def _get_authorization_header(self) -> str:
         return "Bearer " + self._get_api_admin_oidc_token(
-            client_id=self.admin_client_id, client_secret=self.admin_client_secret
+            client_id=self._admin_client_id, client_secret=self._admin_client_secret
         )
 
     def _clear_admin_user_access_token(self) -> None:
-        if self.admin_user_access_token:
-            self.admin_user_access_token = None
+        self._admin_user_access_token = None
 
     def _get_api_admin_oidc_token(
         self, client_id: str, client_secret: str | None = None
     ) -> str:
-        if self.admin_user_access_token:
-            return self.admin_user_access_token
+        if self._admin_user_access_token:
+            return self._admin_user_access_token
 
         data = {
             "grant_type": "password",
-            "username": self.admin_username,
-            "password": self.admin_password,
+            "username": self._admin_username,
+            "password": self._admin_password,
             "client_id": client_id,
         }
+
         if client_secret:
             data["client_secret"] = client_secret
+
         response = requests.post(
             self._get_token_url(),
             data=data,
@@ -108,9 +122,9 @@ class KeycloakApiClient:
                 f"(msg: {response.json()})"
             )
 
-        self.admin_user_access_token = response.json()["access_token"]
+        self._admin_user_access_token = response.json()["access_token"]
 
-        return self.admin_user_access_token
+        return self._admin_user_access_token
 
     def _get_user_identities(self, keycloak_id: UUID) -> list[dict[str, str]]:
         response = requests.get(
