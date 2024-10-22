@@ -23,6 +23,11 @@ $ pip install -e .
 
 ## Changelog
 
+### v0.10.1
+- Fix failing tests due to `vcr` not being able to decode binary responses for Python>=3.9
+- Delete some ALB related cookie leftovers
+- Replace `flake` with `ruff`
+
 ### v0.10.0
 - Dropped support for Python 3.6
 - Provided support for Python <=3.12

@@ -6,7 +6,7 @@ with open("README.md", "r") as readme:
 
 setup(
     name="python-keycloak-api-client",
-    version="0.10.0",
+    version="0.10.1",
     description="Client for Keycloak Api (mostly users and impersonation)",
     keywords="keycloak,client,api",
     long_description=long_description,
@@ -28,9 +28,6 @@ setup(
         "requests>=2.23",
     ],
     extras_require={
-        "dev": [
-            "pytest>=6.2",
-            "flake8>=6.2",
-        ]
+        "dev": ["pytest>=6.2", "ruff>=0.7.0", "ruff>=0.7.0", "pytest-vcr>=1.0.2"]
     },
 )
