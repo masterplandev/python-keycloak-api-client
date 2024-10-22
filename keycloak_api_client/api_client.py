@@ -1,4 +1,3 @@
-from enum import STRICT
 import json
 from http import HTTPStatus
 from urllib import parse
