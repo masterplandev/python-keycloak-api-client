@@ -13,7 +13,7 @@ from keycloak_api_client.data_classes import (
 from keycloak_api_client.exceptions import KeycloakApiClientException
 from keycloak_api_client.factories import read_keycloak_user_factory
 
-raw_user_1_data = {
+_raw_user_1_data = {
     "id": "7428411e-38c3-47da-9b2e-181502b7148f",
     "createdTimestamp": 1614767329366,
     "username": "testname1",
@@ -37,7 +37,7 @@ raw_user_1_data = {
 }
 
 
-raw_user_2_data = {
+_raw_user_2_data = {
     "id": "11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf",
     "createdTimestamp": 1614767377821,
     "username": "testname2",
@@ -60,7 +60,7 @@ raw_user_2_data = {
     },
 }
 
-raw_existing_client_data = {
+_raw_existing_client_data = {
     "access": {"configure": True, "manage": True, "view": True},
     "alwaysDisplayInConsole": False,
     "attributes": {
@@ -101,6 +101,7 @@ def _keycloak_api_client_factory():
         admin_client_id="admin-client-id",
         admin_client_secret="18069767-90f4-4364-a519-28f908727d7e",
         token_exchange_target_client_id="frontend",
+        relative_path="/auth",
     )
 
 
@@ -136,7 +137,7 @@ def test_search_for_existing_user():
             email="testname1@test.com",
             enabled=True,
             email_verified=True,
-            raw_data=raw_user_1_data,
+            raw_data=_raw_user_1_data,
         ),
         ReadKeycloakUser(
             keycloak_id=UUID("11a8cc8e-b6c9-4f1c-9814-a861b8ade6cf"),
@@ -146,7 +147,7 @@ def test_search_for_existing_user():
             email="test2@test.com",
             enabled=True,
             email_verified=True,
-            raw_data=raw_user_2_data,
+            raw_data=_raw_user_2_data,
         ),
     ]
 
@@ -164,7 +165,7 @@ def test_search_for_existing_user_with_limit_and_offset():
             email="test2@test.com",
             enabled=True,
             email_verified=True,
-            raw_data=raw_user_2_data,
+            raw_data=_raw_user_2_data,
         ),
     ]
 
@@ -181,7 +182,7 @@ def test_get_existing_user():
         email="testname1@test.com",
         enabled=True,
         email_verified=True,
-        raw_data=raw_user_1_data,
+        raw_data=_raw_user_1_data,
     )
 
 
@@ -207,7 +208,7 @@ def test_get_existing_user_by_keycloak_id():
         email="test2@test.com",
         enabled=True,
         email_verified=True,
-        raw_data=raw_user_2_data,
+        raw_data=_raw_user_2_data,
     )
 
 
@@ -327,9 +328,9 @@ def test_get_user_tokens():
     )
     assert keycloak_api_client.get_user_tokens(
         keycloak_id=keycloak_id,
-        starting_client_id=keycloak_api_client.admin_client_id,
-        target_client_id=keycloak_api_client.token_exchange_target_client_id,
-        starting_client_secret=keycloak_api_client.admin_client_secret,
+        starting_client_id=keycloak_api_client._admin_client_id,
+        target_client_id=keycloak_api_client._token_exchange_target_client_id,
+        starting_client_secret=keycloak_api_client._admin_client_secret,
     ) == KeycloakTokens(
         access_token="eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpS0ZBa1YyY2xDWTdodlhGVTNrZmN2RzY2UHpKQWplYjFtU2hEOEVzVFRBIn0.eyJleHAiOjE2MTQ3NzE5NTAsImlhdCI6MTYxNDc3MTY1MCwianRpIjoiMTFiMDk0ZjgtYTg2MC00OGNlLTk5MWMtN2QxMGZkMzhkOWZkIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjpbImFjY291bnQiLCJmcm9udGVuZCJdLCJzdWIiOiIzNDZkZjMxYS0zMmExLTRkOWItYjYxMy1jNmQwYjRmZDFiYjAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJmcm9udGVuZCIsInNlc3Npb25fc3RhdGUiOiI0ZGY4Mjk4Yy1mZWJlLTQ5ZmUtODY0Zi0wZDk1NDc0MzUxMzMiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJfZmlyc3RfbmFtZTEgX2xhc3RfbmFtZTEiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJfdXNlcm5hbWUxIiwiZ2l2ZW5fbmFtZSI6Il9maXJzdF9uYW1lMSIsImZhbWlseV9uYW1lIjoiX2xhc3RfbmFtZTEiLCJlbWFpbCI6Il90ZXN0LXVzZXIxQHRlc3QuY29tIn0.CriZLjpfHF4OXPA4n2o5iu0unaC0xWy0FdeeG_KJD6MZ75EaFS3yo-jSDgwO1U91y7lZtHyOtWzntJ2j_MgvyhUWEivaL1mWeUdPOlZAFcsIUKzu_K_1Ht7AmSAOIkoDafsgmqCMs546dNnul3bT13rXgVsmPN0ndXBromo--liTDcPw1lGUqKRA9Ph-SrPV0we_BBTmXF-SuOTlOh1bK7m6WkL93Z6c3a6qEnuxeqPMiQGRh_qkeJ-FY6hNn-3ZL2HNgiJJT_VxlX--E1gKz3F2kx2p3UzjmPNzbURasG6VaXKXK0i2dQ8vIl1HGSbXkVG-X1YJZM_BxPM9CYkaWw",  # noqa
         refresh_token="eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJmYjJjZDVjNC05NTk4LTQxMjQtODQzZC04OWJjZWJlNjdjOWEifQ.eyJleHAiOjE2MTQ3NzM0NTAsImlhdCI6MTYxNDc3MTY1MCwianRpIjoiYzdlMDNlMDQtYzhjNC00ZGQ3LTkwN2YtMWJkMTZhNGI0NDUyIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwic3ViIjoiMzQ2ZGYzMWEtMzJhMS00ZDliLWI2MTMtYzZkMGI0ZmQxYmIwIiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImZyb250ZW5kIiwic2Vzc2lvbl9zdGF0ZSI6IjRkZjgyOThjLWZlYmUtNDlmZS04NjRmLTBkOTU0NzQzNTEzMyIsInNjb3BlIjoicHJvZmlsZSBlbWFpbCJ9.eYeCbgYZfUj8Y-605hdsU2sp6M9gqTXRMp-YtZrtHmw",  # noqa
@@ -337,8 +338,8 @@ def test_get_user_tokens():
     keycloak_api_client = _keycloak_api_client_factory()
     assert keycloak_api_client.get_user_tokens(
         keycloak_id=keycloak_id,
-        starting_client_id=keycloak_api_client.token_exchange_target_client_id,
-        target_client_id=keycloak_api_client.token_exchange_target_client_id,
+        starting_client_id=keycloak_api_client._token_exchange_target_client_id,
+        target_client_id=keycloak_api_client._token_exchange_target_client_id,
     ) == KeycloakTokens(
         access_token="eybbbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJpS0ZBa1YyY2xDWTdodlhGVTNrZmN2RzY2UHpKQWplYjFtU2hEOEVzVFRBIn0.eyJleHAiOjE2MTQ3NzE5NTAsImlhdCI6MTYxNDc3MTY1MCwianRpIjoiMTFiMDk0ZjgtYTg2MC00OGNlLTk5MWMtN2QxMGZkMzhkOWZkIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjpbImFjY291bnQiLCJmcm9udGVuZCJdLCJzdWIiOiIzNDZkZjMxYS0zMmExLTRkOWItYjYxMy1jNmQwYjRmZDFiYjAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJmcm9udGVuZCIsInNlc3Npb25fc3RhdGUiOiI0ZGY4Mjk4Yy1mZWJlLTQ5ZmUtODY0Zi0wZDk1NDc0MzUxMzMiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJfZmlyc3RfbmFtZTEgX2xhc3RfbmFtZTEiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJfdXNlcm5hbWUxIiwiZ2l2ZW5fbmFtZSI6Il9maXJzdF9uYW1lMSIsImZhbWlseV9uYW1lIjoiX2xhc3RfbmFtZTEiLCJlbWFpbCI6Il90ZXN0LXVzZXIxQHRlc3QuY29tIn0.CriZLjpfHF4OXPA4n2o5iu0unaC0xWy0FdeeG_KJD6MZ75EaFS3yo-jSDgwO1U91y7lZtHyOtWzntJ2j_MgvyhUWEivaL1mWeUdPOlZAFcsIUKzu_K_1Ht7AmSAOIkoDafsgmqCMs546dNnul3bT13rXgVsmPN0ndXBromo--liTDcPw1lGUqKRA9Ph-SrPV0we_BBTmXF-SuOTlOh1bK7m6WkL93Z6c3a6qEnuxeqPMiQGRh_qkeJ-FY6hNn-3ZL2HNgiJJT_VxlX--E1gKz3F2kx2p3UzjmPNzbURasG6VaXKXK0i2dQ8vIl1HGSbXkVG-X1YJZM_BxPM9CYkaWw",  # noqa
         refresh_token="eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJmYjJjZDVjNC05NTk4LTQxMjQtODQzZC04OWJjZWJlNjdjOWEifQ.eyJleHAiOjE2MTQ3NzM0NTAsImlhdCI6MTYxNDc3MTY1MCwianRpIjoiYzdlMDNlMDQtYzhjNC00ZGQ3LTkwN2YtMWJkMTZhNGI0NDUyIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2F1dGgvcmVhbG1zL215LXJlYWxtIiwic3ViIjoiMzQ2ZGYzMWEtMzJhMS00ZDliLWI2MTMtYzZkMGI0ZmQxYmIwIiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImZyb250ZW5kIiwic2Vzc2lvbl9zdGF0ZSI6IjRkZjgyOThjLWZlYmUtNDlmZS04NjRmLTBkOTU0NzQzNTEzMyIsInNjb3BlIjoicHJvZmlsZSBlbWFpbCJ9.eYeCbgYZfUj8Y-605hdsU2sp6M9gqTXRMp-YtZrtHmw",  # noqa
@@ -355,27 +356,27 @@ def test_count_users():
 def test_password_reset():
     assert (
         _keycloak_api_client_factory().reset_password(
-            keycloak_id=raw_user_1_data["id"], new_password="test", temporary=False
+            keycloak_id=_raw_user_1_data["id"], new_password="test", temporary=False
         )
         is None
     )
     keycloak_user = _keycloak_api_client_factory().search_users(
-        query=raw_user_1_data["username"]
+        query=_raw_user_1_data["username"]
     )[0]
     assert "UPDATE_PASSWORD" not in keycloak_user.raw_data["requiredActions"]
     assert (
         _keycloak_api_client_factory().reset_password(
-            keycloak_id=raw_user_1_data["id"], new_password="test", temporary=True
+            keycloak_id=_raw_user_1_data["id"], new_password="test", temporary=True
         )
         is None
     )
     keycloak_user = _keycloak_api_client_factory().search_users(
-        query=raw_user_1_data["username"]
+        query=_raw_user_1_data["username"]
     )[0]
     assert "UPDATE_PASSWORD" in keycloak_user.raw_data["requiredActions"]
     with pytest.raises(KeycloakApiClientException):
         _keycloak_api_client_factory().reset_password(
-            keycloak_id=raw_user_1_data["id"], new_password="test", temporary=True
+            keycloak_id=_raw_user_1_data["id"], new_password="test", temporary=True
         )
 
 
@@ -383,7 +384,7 @@ def test_password_reset():
 def test_send_verification_email():
     assert (
         _keycloak_api_client_factory().send_verification_email(
-            keycloak_id=raw_user_1_data["id"]
+            keycloak_id=_raw_user_1_data["id"]
         )
         is None
     )
@@ -481,11 +482,11 @@ def test_search_clients_by_client_id():
         client_id=existing_client_id
     ) == [
         KeycloakClient(
-            keycloak_id=UUID(raw_existing_client_data["id"]),
-            client_id=raw_existing_client_data["clientId"],
-            enabled=raw_existing_client_data["enabled"],
+            keycloak_id=UUID(_raw_existing_client_data["id"]),
+            client_id=_raw_existing_client_data["clientId"],
+            enabled=_raw_existing_client_data["enabled"],
             service_account_enabled=(
-                raw_existing_client_data["serviceAccountsEnabled"]
+                _raw_existing_client_data["serviceAccountsEnabled"]
             ),
         )
     ]
@@ -512,7 +513,7 @@ def test_delete_client():
         "response code=404"
     )
 
-    keycloak_api_client.delete_client(id_of_client=raw_existing_client_data["id"])
+    keycloak_api_client.delete_client(id_of_client=_raw_existing_client_data["id"])
 
 
 @pytest.mark.vcr()
@@ -530,4 +531,4 @@ def test_delete_user():
         "response code=404"
     )
 
-    keycloak_api_client.delete_user(user_id=raw_user_1_data["id"])
+    keycloak_api_client.delete_user(user_id=_raw_user_1_data["id"])
