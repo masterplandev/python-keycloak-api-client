@@ -4,65 +4,20 @@ orbs:
   python: circleci/python@1.3.2
 
 jobs:
-  test_py37:
+  test_python:
+    parameters:
+      docker_image:
+        type: string
+      tox_cmd:
+        type: string
     docker:
-      - image: cimg/python:3.7.10
+      - image: << parameters.python_version >>
     steps:
       - checkout
       - run: python setup.py bdist_wheel
       - run: pip install -e .
       - run: pip install tox
-      - run: tox -e py37
-
-  test_py38:
-    docker:
-      - image: cimg/python:3.8.8
-    steps:
-      - checkout
-      - run: python setup.py bdist_wheel
-      - run: pip install -e .
-      - run: pip install tox
-      - run: tox -e py38
-
-  test_py39:
-    docker:
-      - image: cimg/python:3.9.2
-    steps:
-      - checkout
-      - run: python setup.py bdist_wheel
-      - run: pip install -e .
-      - run: pip install tox
-      - run: tox -e py39
-
-  test_py310:
-    docker:
-      - image: cimg/python:3.10.13
-    steps:
-      - checkout
-      - run: python setup.py bdist_wheel
-      - run: pip install -e .
-      - run: pip install tox
-      - run: tox -e py310
-
-  test_py311:
-    docker:
-      - image: cimg/python:3.11.4
-    steps:
-      - checkout
-      - run: python setup.py bdist_wheel
-      - run: pip install -e .
-      - run: pip install tox
-      - run: tox -e py311
-
-  test_py312:
-    docker:
-      - image: cimg/python:3.12.6
-    steps:
-      - checkout
-      - run: python setup.py bdist_wheel
-      - run: pip install -e .
-      - run: pip install tox
-      - run: tox -e py312
+      - run: << parameters.tox_cmd >>
 
   pypi_distribution:
     docker:
@@ -80,17 +35,25 @@ workflows:
   version: 2
   app:
     jobs:
-      - test_py37
-      - test_py38
-      - test_py39
-      - test_py310
-      - test_py311
-      - test_py312
+      - test_python:
+          name: test_python_39
+          docker_image: "cimg/python:3.9.2"
+          tox_cmd: tox -e py39
+      - test_python:
+          name: test_python_310
+          docker_image: "cimg/python:3.10.13"
+          tox_cmd: tox -e py310
+      - test_python:
+          name: test_python_311
+          docker_image: "cimg/python:3.11.4"
+          tox_cmd: tox -e py311
+      - test_python:
+          name: test_python_312
+          docker_image: "cimg/python:3.12.6"
+          tox_cmd: tox -e py312
       - approve_pypi_distribution:
           type: approval
           requires:
-            - test_py37
-            - test_py38
             - test_py39
             - test_py310
             - test_py311
