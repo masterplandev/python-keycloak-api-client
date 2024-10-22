@@ -2,20 +2,55 @@
 
 ## Usage
 
+### Install
+
+```bash
+$ pip install python-keycloak-api-client
+```
+
+### Example
+
 ```python
 from keycloak_api_client import KeycloakApiClient
 
-keycloak_api_client = KeycloakApiClient(...)
-read_keycloak_user = keycloak_api_client.get_keycloak_user_by_email('johndoe@example.com')
-```
+client = KeycloakApiClient(
+    keycloak_url: "https://auth.myservice.com",
+    realm: "myservice",
+    admin_username: "my_keycloak_admin",
+    admin_password: "...",
+    admin_client_id: "my_service_backend_client_id",
+    admin_client_secret: "...",
+    token_exchange_target_client_id: "my_service_backend_client_id",
+)
 
-## Test
-
-```bash
-$ tox
+read_kc_user = client.get_keycloak_user_by_email('johndoe@myservice.com')
+read_kc_user.email      # johndoe@myservice.com
+read_kc_user.enabled    # True
+read_kc_user.first_name # John
+read_kc_user.last_name  # Doe
+...
 ```
 
 ## Development
+
+### Test
+
+```bash
+# Runs tests for all Python versions and checks linter
+$ tox
+```
+
+### Linter
+
+```bash
+# Format
+$ ruff format
+
+# Check
+$ ruff check
+```
+
+### Install
 
 ```bash
 $ pip install -e .
