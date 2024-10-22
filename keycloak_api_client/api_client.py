@@ -26,7 +26,6 @@ class KeycloakApiClient:
     _admin_password: str
     _admin_client_id: str
     _admin_client_secret: str
-    _token_exchange_target_client_id: str
     _relative_path: str | None
 
     _admin_user_access_token: str | None = None
@@ -39,7 +38,6 @@ class KeycloakApiClient:
         admin_password: str,
         admin_client_id: str,
         admin_client_secret: str,
-        token_exchange_target_client_id: str,
         relative_path: str | None,
     ):
         self._keycloak_url = keycloak_url
@@ -48,7 +46,6 @@ class KeycloakApiClient:
         self._admin_password = admin_password
         self._admin_client_id = admin_client_id
         self._admin_client_secret = admin_client_secret
-        self._token_exchange_target_client_id = token_exchange_target_client_id
         self._relative_path = relative_path
 
     def _get_base_url(self) -> str:
@@ -95,8 +92,7 @@ class KeycloakApiClient:
         )
 
     def _clear_admin_user_access_token(self) -> None:
-        if self._admin_user_access_token:
-            self._admin_user_access_token = None
+        self._admin_user_access_token = None
 
     def _get_api_admin_oidc_token(
         self, client_id: str, client_secret: str | None = None

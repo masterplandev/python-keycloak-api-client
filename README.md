@@ -20,7 +20,6 @@ client = KeycloakApiClient(
     admin_password: "...",
     admin_client_id: "my_service_backend_client_id",
     admin_client_secret: "...",
-    token_exchange_target_client_id: "my_service_backend_client_id",
     relative_path: "/auth",
 )
 
