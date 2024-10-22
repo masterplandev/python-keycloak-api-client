@@ -36,10 +36,6 @@ workflows:
   app:
     jobs:
       - test_python:
-          name: test_python_39
-          docker_image: "cimg/python:3.9.2"
-          tox_cmd: tox -e py39
-      - test_python:
           name: test_python_310
           docker_image: "cimg/python:3.10.13"
           tox_cmd: tox -e py310
@@ -54,7 +50,6 @@ workflows:
       - approve_pypi_distribution:
           type: approval
           requires:
-            - test_python_39
             - test_python_310
             - test_python_311
             - test_python_312
