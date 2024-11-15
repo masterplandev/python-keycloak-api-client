@@ -1,6 +1,6 @@
 # Python Keycloak Client
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/masterplandev/python-keycloak-api-client/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/masterplandev/python-keycloak-api-client/tree/main)
+[![PyPI version](https://badge.fury.io/py/python-keycloak-api-client.svg)](https://badge.fury.io/py/python-keycloak-api-client) [![CircleCI](https://dl.circleci.com/status-badge/img/gh/masterplandev/python-keycloak-api-client/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/masterplandev/python-keycloak-api-client/tree/main)
 
 ## Usage
 
