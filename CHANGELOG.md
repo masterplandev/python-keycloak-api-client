@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.13.0
+- Added CI badges
+- Add general readme info
+
 ## v0.12.0
 - Provided option for [relative path](https://www.keycloak.org/server/all-config?q=relative-path) configuration
 - Adjusted scope of client private properties

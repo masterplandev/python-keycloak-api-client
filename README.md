@@ -1,4 +1,8 @@
-# Python Keycloak Client
+# Python Keycloak API client
+
+[![PyPI version](https://badge.fury.io/py/python-keycloak-api-client.svg)](https://badge.fury.io/py/python-keycloak-api-client) [![CircleCI](https://dl.circleci.com/status-badge/img/gh/masterplandev/python-keycloak-api-client/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/masterplandev/python-keycloak-api-client/tree/main)
+
+This library wraps the Keycloak REST API, providing an easy way to manage users, clients, and other Keycloak resources. It’s simple, extendable, and has been tested in production.
 
 ## Usage
 
