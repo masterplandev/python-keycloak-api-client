@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import json
 from http import HTTPStatus
 from urllib import parse
@@ -27,8 +28,10 @@ class KeycloakApiClient:
     _admin_client_id: str
     _admin_client_secret: str
     _relative_path: str | None
+    _admin_user_token_expiration_time: int
 
     _admin_user_access_token: str | None = None
+    _admin_user_token_acquire_time: datetime | None = None
 
     def __init__(
         self,
@@ -39,6 +42,7 @@ class KeycloakApiClient:
         admin_client_id: str,
         admin_client_secret: str,
         relative_path: str | None,
+        admin_user_token_expiration_time: int = 60,
     ):
         self._keycloak_url = keycloak_url
         self._realm = realm
@@ -47,6 +51,7 @@ class KeycloakApiClient:
         self._admin_client_id = admin_client_id
         self._admin_client_secret = admin_client_secret
         self._relative_path = relative_path
+        self._admin_user_token_expiration_time = admin_user_token_expiration_time
 
     def _get_base_url(self) -> str:
         if self._relative_path:
@@ -55,8 +60,7 @@ class KeycloakApiClient:
 
     def _get_token_url(self) -> str:
         return (
-            f"{self._get_base_url()}/realms/{self._realm}"
-            "/protocol/openid-connect/token"
+            f"{self._get_base_url()}/realms/{self._realm}/protocol/openid-connect/token"
         )
 
     def _get_users_url(self) -> str:
@@ -84,7 +88,7 @@ class KeycloakApiClient:
         return f"{self._get_clients_url()}/{id_of_client}"
 
     def _get_client_mappers_url(self, id_of_client: UUID) -> str:
-        return f"{self._get_clients_url()}/{id_of_client}" f"/protocol-mappers/models"
+        return f"{self._get_clients_url()}/{id_of_client}/protocol-mappers/models"
 
     def _get_authorization_header(self) -> str:
         return "Bearer " + self._get_api_admin_oidc_token(
@@ -94,10 +98,16 @@ class KeycloakApiClient:
     def _clear_admin_user_access_token(self) -> None:
         self._admin_user_access_token = None
 
+    def _is_admin_user_token_expired(self) -> bool:
+        expiration_time = self._admin_user_token_acquire_time + timedelta(
+            seconds=self._admin_user_token_expiration_time
+        )
+        return datetime.now() >= expiration_time
+
     def _get_api_admin_oidc_token(
         self, client_id: str, client_secret: str | None = None
     ) -> str:
-        if self._admin_user_access_token:
+        if self._admin_user_access_token and not self._is_admin_user_token_expired():
             return self._admin_user_access_token
 
         data = {
@@ -118,12 +128,11 @@ class KeycloakApiClient:
 
         if not response.ok:
             raise KeycloakApiClientException(
-                "Error while obtaining api-admin access_token "
-                f"(msg: {response.json()})"
+                f"Error while obtaining api-admin access_token (msg: {response.json()})"
             )
 
         self._admin_user_access_token = response.json()["access_token"]
-
+        self._admin_user_token_acquire_time = datetime.now()
         return self._admin_user_access_token
 
     def _get_user_identities(self, keycloak_id: UUID) -> list[dict[str, str]]:
@@ -318,7 +327,7 @@ class KeycloakApiClient:
 
         data = {
             "audience": target_client_id,
-            "grant_type": "urn:ietf:params:oauth:grant-type" ":token-exchange",
+            "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
             "requested_subject": str(keycloak_id),
             "subject_token": self._get_api_admin_oidc_token(
                 client_id=starting_client_id, client_secret=starting_client_secret
