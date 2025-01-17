@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.13.1
+- Add a check for the expiration of the admin user token
+
 ## v0.13.0
 - Added CI badges
 - Add general readme info
