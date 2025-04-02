@@ -13,8 +13,8 @@ class KeycloakFederatedIdentity:
 @attr.s(auto_attribs=True)
 class BaseKeycloakUser:
     username: str
-    first_name: str
-    last_name: str
+    first_name: str | None
+    last_name: str | None
     email: str
     enabled: bool
     email_verified: bool
