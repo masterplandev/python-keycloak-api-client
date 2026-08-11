@@ -3,7 +3,7 @@ from uuid import UUID
 
 from attrs.converters import to_bool
 
-from keycloak_api_client.data_classes import ReadKeycloakUser, KeycloakClient
+from keycloak_api_client.data_classes import KeycloakClient, ReadKeycloakUser
 
 
 def read_keycloak_user_factory(user_endpoint_data: dict[str, Any]) -> ReadKeycloakUser:

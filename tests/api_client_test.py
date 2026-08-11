@@ -392,11 +392,11 @@ def test_send_verification_email():
         _keycloak_api_client_factory().send_verification_email(
             keycloak_id=UUID("eae0c454-ebca-41df-8279-f0d282c31a44")
         )
-    assert str(ex.value) == (
-        "Error while sending a verification email for user with ID "
-        "eae0c454-ebca-41df-8279-f0d282c31a44 "
-        "(msg: {'error': 'User not found'})"
-    )
+
+    assert ex.value.details == {
+        "error": "User not found",
+        "keycloak_id": UUID("eae0c454-ebca-41df-8279-f0d282c31a44"),
+    }
 
 
 @pytest.mark.vcr()
@@ -418,12 +418,14 @@ def test_create_client_and_create_mapper():
             client_id=client_id, client_secret=client_secret, id=str(id_of_client)
         )
 
-    assert str(ex.value) == (
-        "Error while creating new client "
-        "with data={'clientId': 'test_client_id', "
-        "'secret': 'test_secret', 'id': "
-        "'00000000-0000-0000-0000-000000000000'}"
-    )
+    assert ex.value.details == {
+        "response_code": 500,
+        "data": {
+            "clientId": client_id,
+            "secret": client_secret,
+            "id": str(id_of_client),
+        },
+    }
 
     protocol = "openid-connect"
     config = {
@@ -457,19 +459,15 @@ def test_create_client_and_create_mapper():
             id_of_client=wrong_id_of_client,
         )
 
-    assert str(ex.value) == (
-        "Error while creating client mapper with "
-        "data={'protocol': 'openid-connect', "
-        "'config': {'access.token.claim': 'true', "
-        "'access.tokenResponse.claim': "
-        "'false', 'claim.name': 'test_mapper', "
-        "'claim.value': 'any_value', "
-        "'id.token.claim': 'false', "
-        "'userinfo.token.claim': 'false'}, "
-        "'name': 'Test "
-        "mapper', 'protocolMapper': "
-        "'oidc-hardcoded-claim-mapper'}"
-    )
+    assert ex.value.details == {
+        "error": "Could not find client",
+        "data": {
+            "protocol": protocol,
+            "config": config,
+            "name": name,
+            "protocolMapper": protocol_mapper,
+        },
+    }
 
 
 @pytest.mark.vcr()
@@ -506,11 +504,11 @@ def test_delete_client():
             id_of_client=UUID("00000000-0000-0000-0000-000000000000")
         )
 
-    assert str(ex.value) == (
-        "Error while deleting client with "
-        "ID=00000000-0000-0000-0000-000000000000) "
-        "response code=404"
-    )
+    assert ex.value.details == {
+        "error": "Could not find client",
+        "client_id": UUID("00000000-0000-0000-0000-000000000000"),
+        "response_code": 404,
+    }
 
     keycloak_api_client.delete_client(id_of_client=_raw_existing_client_data["id"])
 
@@ -524,10 +522,10 @@ def test_delete_user():
             user_id=UUID("00000000-0000-0000-0000-000000000000")
         )
 
-    assert str(ex.value) == (
-        "Error while deleting user with "
-        "ID=00000000-0000-0000-0000-000000000000) "
-        "response code=404"
-    )
+    assert ex.value.details == {
+        "error": "User not found",
+        "user_id": UUID("00000000-0000-0000-0000-000000000000"),
+        "response_code": 404,
+    }
 
     keycloak_api_client.delete_user(user_id=_raw_user_1_data["id"])

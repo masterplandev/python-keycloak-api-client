@@ -1,0 +1,29 @@
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E4",
+    "E7",
+    "E9",
+    # pyflakes
+    "F",
+    # point out print statements
+    "T201",
+    # isort
+    "I",
+]
+ignore = [
+    # Module level import not at top of file
+    "E402",
+]
+
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
