@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import json
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from urllib import parse
 from uuid import UUID
@@ -10,8 +10,8 @@ from keycloak_api_client.data_classes import (
     KeycloakClient,
     KeycloakFederatedIdentity,
     KeycloakTokens,
-    WriteKeycloakUser,
     ReadKeycloakUser,
+    WriteKeycloakUser,
 )
 from keycloak_api_client.exceptions import KeycloakApiClientException
 from keycloak_api_client.factories import (
@@ -102,7 +102,7 @@ class KeycloakApiClient:
         expiration_time = self._admin_user_token_acquire_time + timedelta(
             seconds=self._admin_user_token_expiration_time
         )
-        return datetime.now() >= expiration_time
+        return datetime.now(tz=timezone.utc) >= expiration_time
 
     def _get_api_admin_oidc_token(
         self, client_id: str, client_secret: str | None = None
@@ -127,12 +127,12 @@ class KeycloakApiClient:
         )
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while obtaining api-admin access_token (msg: {response.json()})"
-            )
+            details = response.json()
+            details["client_id"] = client_id
+            raise KeycloakApiClientException(details=details)
 
         self._admin_user_access_token = response.json()["access_token"]
-        self._admin_user_token_acquire_time = datetime.now()
+        self._admin_user_token_acquire_time = datetime.now(tz=timezone.utc)
         return self._admin_user_access_token
 
     def _get_user_identities(self, keycloak_id: UUID) -> list[dict[str, str]]:
@@ -142,10 +142,9 @@ class KeycloakApiClient:
         )
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                "Error while retrieving identities of user "
-                f"{keycloak_id} (msg: {response.json()})"
-            )
+            details = response.json()
+            details["keycloak_id"] = keycloak_id
+            raise KeycloakApiClientException(details=details)
 
         return response.json()
 
@@ -174,10 +173,9 @@ class KeycloakApiClient:
                 )
 
                 if not response.ok:
-                    raise KeycloakApiClientException(
-                        "Error while creating identity for user "
-                        f"{keycloak_id} (msg: {response.json()})"
-                    )
+                    details = response.json()
+                    details["keycloak_id"] = keycloak_id
+                    raise KeycloakApiClientException(details=details)
 
     def _get_user_endpoint_schema_data(
         self, write_keycloak_user: WriteKeycloakUser
@@ -225,10 +223,9 @@ class KeycloakApiClient:
             return None
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while retrieving user with id {keycloak_id} "
-                f"(msg: {response.json()})"
-            )
+            details = response.json()
+            details["keycloak_id"] = keycloak_id
+            raise KeycloakApiClientException(details=details)
 
         if not response.json():
             return None
@@ -245,10 +242,9 @@ class KeycloakApiClient:
         )
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while retrieving user with email {email} "
-                f"(msg: {response.json()})"
-            )
+            details = response.json()
+            details["email"] = email
+            raise KeycloakApiClientException(details=details)
 
         if len(response.json()) == 0:
             return None
@@ -277,9 +273,7 @@ class KeycloakApiClient:
         )
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while creating user (msg: {response.json()})"
-            )
+            raise KeycloakApiClientException(details=response.json())
 
         keycloak_id = response.headers["Location"].split("/")[-1]
 
@@ -306,9 +300,7 @@ class KeycloakApiClient:
         )
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while updating user (msg: {response.json()})"
-            )
+            raise KeycloakApiClientException(details=response.json())
 
         if write_keycloak_user.federated_identities:
             self._update_user_identities(
@@ -345,10 +337,9 @@ class KeycloakApiClient:
         )
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                "Error while obtaining user tokens "
-                f"{keycloak_id} (msg: {response.json()})"
-            )
+            details = response.json()
+            details["keycloak_id"] = keycloak_id
+            raise KeycloakApiClientException(details=details)
 
         data = response.json()
 
@@ -366,10 +357,9 @@ class KeycloakApiClient:
         )
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while retrieving users with query {query} "
-                f"(msg: {response.json()})"
-            )
+            details = response.json()
+            details["search_query"] = query
+            raise KeycloakApiClientException(details=details)
 
         return [
             read_keycloak_user_factory(user_endpoint_data=user_data)
@@ -384,11 +374,9 @@ class KeycloakApiClient:
             headers={"Authorization": self._get_authorization_header()},
         )
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while retrieving users count "
-                f"{'with query' + query if query else None}"
-                f"(msg: {response.json()})"
-            )
+            details = response.json()
+            details["count_query"] = query
+            raise KeycloakApiClientException(details=details)
         return response.json()
 
     def reset_password(
@@ -401,11 +389,9 @@ class KeycloakApiClient:
             headers={"Authorization": self._get_authorization_header()},
         )
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while resetting password for "
-                f"user with ID {keycloak_id}"
-                f"(msg: {response.json()})"
-            )
+            details = response.json()
+            details["keycloak_id"] = keycloak_id
+            raise KeycloakApiClientException(details=details)
 
     def send_verification_email(
         self,
@@ -430,10 +416,9 @@ class KeycloakApiClient:
         )
 
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while sending a verification email for "
-                f"user with ID {keycloak_id} (msg: {response.json()})"
-            )
+            details = response.json()
+            details["keycloak_id"] = keycloak_id
+            raise KeycloakApiClientException(details=details)
 
     def create_client(self, client_id: str, client_secret: str, **kwargs) -> None:
         """
@@ -453,7 +438,7 @@ class KeycloakApiClient:
         )
         if not response.ok:
             raise KeycloakApiClientException(
-                f"Error while creating new client with data={data}"
+                details={"response_code": response.status_code, "data": data}
             )
 
     def create_mapper_for_client(
@@ -483,9 +468,9 @@ class KeycloakApiClient:
             },
         )
         if not response.ok:
-            raise KeycloakApiClientException(
-                f"Error while creating client mapper with data={data}"
-            )
+            details = response.json()
+            details["data"] = data
+            raise KeycloakApiClientException(details=details)
 
     def search_clients_by_client_id(self, client_id: str) -> list[KeycloakClient]:
         response = requests.get(
@@ -494,10 +479,10 @@ class KeycloakApiClient:
             headers={"Authorization": self._get_authorization_header()},
         )
         if not response.ok:
-            raise KeycloakApiClientException(
-                "Error while retrieving client data by clientId "
-                f"(clientId: {client_id})"
-            )
+            details = response.json()
+            details["client_id"] = client_id
+            raise KeycloakApiClientException(details=details)
+
         return [keycloak_client_factory(client) for client in response.json()]
 
     def delete_client(self, id_of_client: UUID) -> None:
@@ -506,11 +491,10 @@ class KeycloakApiClient:
             headers={"Authorization": self._get_authorization_header()},
         )
         if not response.ok:
-            raise KeycloakApiClientException(
-                "Error while deleting client "
-                f"with ID={id_of_client}) "
-                f"response code={response.status_code}"
-            )
+            details = response.json()
+            details["client_id"] = id_of_client
+            details["response_code"] = response.status_code
+            raise KeycloakApiClientException(details=details)
 
     def delete_user(self, user_id: UUID) -> None:
         response = requests.delete(
@@ -518,8 +502,7 @@ class KeycloakApiClient:
             headers={"Authorization": self._get_authorization_header()},
         )
         if not response.ok:
-            raise KeycloakApiClientException(
-                "Error while deleting user "
-                f"with ID={user_id}) "
-                f"response code={response.status_code}"
-            )
+            details = response.json()
+            details["user_id"] = user_id
+            details["response_code"] = response.status_code
+            raise KeycloakApiClientException(details=details)

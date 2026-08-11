@@ -47,12 +47,17 @@ workflows:
           name: test_python_312
           docker_image: "cimg/python:3.12.6"
           tox_cmd: tox -e py312
+      - test_python:
+          name: test_python_314
+          docker_image: "cimg/python:3.14.6"
+          tox_cmd: tox -e py314
       - approve_pypi_distribution:
           type: approval
           requires:
             - test_python_310
             - test_python_311
             - test_python_312
+            - test_python_314
           filters:
             branches:
               only:

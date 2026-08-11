@@ -147,3 +147,7 @@ dmypy.json
 .prof
 
 pyrightconfig.json
+
+
+# ruff
+.ruff_cache/

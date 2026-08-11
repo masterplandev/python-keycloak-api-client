@@ -1,12 +1,11 @@
 from setuptools import setup
 
-
 with open("README.md", "r") as readme:
     long_description = readme.read()
 
 setup(
     name="python-keycloak-api-client",
-    version="0.13.2",
+    version="0.14.0",
     description="Client for Keycloak Api (mostly users and impersonation)",
     keywords="keycloak,client,api",
     long_description=long_description,

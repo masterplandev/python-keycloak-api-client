@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.14.0
+- Add `.ruff_cache` to `.gitignore`
+- Add `ruff` configuration within `pyproject.toml`
+- Refactor `KeycloakApiClientException` to be json structured
+- Add checks for python 3.14
+
 ## v0.13.2
 
 - Make `first_name` and `last_name` optional in `BaseKeycloakUser` as they can be `None`
