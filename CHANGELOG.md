@@ -1,6 +1,12 @@
 # Changelog
 
+## v0.14.1
+
+- Upgrade `twine` package version for PyPi distribution publish
+- Upgrade python version to `3.10.13` for pypi distribution build
+
 ## v0.14.0
+
 - Add `.ruff_cache` to `.gitignore`
 - Add `ruff` configuration within `pyproject.toml`
 - Refactor `KeycloakApiClientException` to be json structured
