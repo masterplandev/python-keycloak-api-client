@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.14.2
+
+- Upgrade `setuptools` to version that support PEP 625 compatible `sdist` filenames
+
 ## v0.14.1
 
 - Upgrade `twine` package version for PyPi distribution publish
